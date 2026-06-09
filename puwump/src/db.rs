@@ -5,7 +5,11 @@ use uuid::Uuid;
 
 use crate::{
     errors::{PuwumpError, Result},
-    models::{Exercise, core::statement_to_model, plan::Plan},
+    models::{
+        Exercise, PlanExerciseDetail,
+        core::{Model, statement_to_model},
+        plan::Plan,
+    },
     util::{create_dirs_to_path, get_full_db_path, ids_from_statement},
 };
 
@@ -52,11 +56,14 @@ impl Db {
         Ok(())
     }
 
-    pub fn new_plan(&self, name: &str, description: &str, est_min: u16) -> Result<()> {
-        let id = Uuid::new_v4().to_string();
-        self.con
-            .execute("INSERT INTO plan (id, name, description, est_mins)  VALUES (?1, ?2, ?3, ?4)", params![id, name, description, est_min])?;
-        Ok(())
+    pub fn new_plan(&self, name: &str, description: &str, est_min: u16) -> Result<Uuid> {
+        let id = Uuid::new_v4();
+        self.con.execute(
+            "INSERT INTO plan (id, name, description, est_mins)  VALUES (?1, ?2, ?3, ?4)",
+            params![id.to_string(), name, description, est_min],
+        )?;
+
+        Ok(id)
     }
 
     pub fn get_all_plans(&self) -> Result<Vec<Uuid>> {
@@ -106,6 +113,21 @@ impl Db {
         let plan = statement_to_model(stmt, params![uuid.to_string()])?;
 
         Ok(plan)
+    }
+
+    pub fn get_plan_exercises(&self, uuid: Uuid) -> Result<Vec<PlanExerciseDetail>> {
+        let mut stmt = self.con.prepare(
+            "SELECT e.id, e.name, e.instructions, pe.order_index, pe.reps
+        FROM plan_exercise pe
+        JOIN exercise e ON e.id = pe.exercise_id
+        WHERE pe.plan_id = ?1
+        ORDER BY pe.order_index ASC",
+        )?;
+        let exercises = stmt
+            .query_map(params![uuid.to_string()], <PlanExerciseDetail as Model>::from_row)?
+            .collect::<rusqlite::Result<Vec<PlanExerciseDetail>>>()
+            .map_err(|_| PuwumpError::RowNotFound)?;
+        Ok(exercises)
     }
 
     pub fn insert_exercise(&self, plan_id: Uuid, exercise_id: Uuid, reps: u16, order_index: u16) -> Result<()> {

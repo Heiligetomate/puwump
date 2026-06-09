@@ -1,8 +1,10 @@
+use std::fmt::Debug;
+
 use rusqlite::{Params, Statement};
 
 use crate::errors::{PuwumpError, Result};
 
-pub trait Model {
+pub trait Model: Debug {
     fn from_row(row: &rusqlite::Row) -> rusqlite::Result<Self>
     where
         Self: Sized;
