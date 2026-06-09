@@ -1,6 +1,6 @@
 use egui::{Color32, RichText, Ui};
 
-use crate::{db::Db, errors::Result, ui::add_exercise::AddExerciseForm};
+use crate::{db::Db, errors::Result, models::Exercise, ui::add_exercise::AddExerciseForm};
 
 pub enum View {
     Default,
@@ -30,6 +30,7 @@ pub struct PuwumpUi {
     pub view: View,
     pub theme: Theme,
     pub add_exercise: AddExerciseForm,
+    pub exercises: Vec<Exercise>,
     pub db: Db,
 }
 
@@ -38,6 +39,7 @@ impl PuwumpUi {
         Ok(Self {
             view: View::Default,
             theme: Theme::default(),
+            exercises: Vec::new(),
             add_exercise: AddExerciseForm::default(),
             db: Db::init()?,
         })

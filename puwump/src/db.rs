@@ -74,7 +74,7 @@ impl Db {
         Ok(ids)
     }
 
-    pub fn get_all_exercises(&self) -> Result<Vec<Uuid>> {
+    pub fn get_all_exercise_ids(&self) -> Result<Vec<Uuid>> {
         let stmt = self
             .con
             .prepare("SELECT id FROM exercise")?;
@@ -82,6 +82,15 @@ impl Db {
         let ids = ids_from_statement(stmt)?;
 
         Ok(ids)
+    }
+
+    pub fn get_all_exercises(&self) -> Result<Vec<Exercise>> {
+        let mut exercises = Vec::new();
+        for id in self.get_all_exercise_ids()? {
+            exercises.push(self.get_exercise(id)?);
+        }
+
+        Ok(exercises)
     }
 
     pub fn remove_exercise(&self, uuid: Uuid) -> Result<()> {
