@@ -1,1 +1,4 @@
-/puwump/target
+puwump/target/
+
+*.db
+
