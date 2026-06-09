@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     errors::{PuwumpError, Result},
+    models::{Exercise, core::statement_to_model, plan::Plan},
     util::{create_dirs_to_path, get_full_db_path, ids_from_statement},
 };
 
@@ -86,6 +87,25 @@ impl Db {
         self.con
             .execute("DELETE FROM plan WHERE id = ?1", params![uuid.to_string()])?;
         Ok(())
+    }
+
+    pub fn get_exercise(&self, uuid: Uuid) -> Result<Exercise> {
+        let stmt = self
+            .con
+            .prepare("SELECT id, instructions, name FROM exercise WHERE id = ?1")?;
+
+        let exercise = statement_to_model(stmt, params![uuid.to_string()])?;
+
+        Ok(exercise)
+    }
+
+    pub fn get_plan(&self, uuid: Uuid) -> Result<Plan> {
+        let stmt = self
+            .con
+            .prepare("SELECT id, name, description, est_mins FROM plan WHERE id = ?1")?;
+        let plan = statement_to_model(stmt, params![uuid.to_string()])?;
+
+        Ok(plan)
     }
 
     pub fn insert_exercise(&self, plan_id: Uuid, exercise_id: Uuid, reps: u16, order_index: u16) -> Result<()> {
