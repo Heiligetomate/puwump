@@ -6,4 +6,6 @@ edition = "2024"
 [dependencies]
 rusqlite = "0.40.0"
 uuid = { version = "1.23.3", features = ["v4"] }
+egui = "0.34.3"
+eframe = "0.34.3"
 

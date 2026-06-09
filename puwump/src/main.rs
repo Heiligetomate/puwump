@@ -1,13 +1,10 @@
 pub mod db;
 pub mod errors;
 pub mod models;
+mod ui;
 pub mod util;
 
-use std::str::FromStr;
-
-use uuid::Uuid;
-
-use crate::{db::Db, errors::Result};
+use crate::{db::Db, errors::Result, ui::core::PuwumpUi};
 
 #[rustfmt::skip]
 static EXAMPLE_VALUES: [(&str, &str); 20] = [
@@ -33,6 +30,7 @@ static EXAMPLE_VALUES: [(&str, &str); 20] = [
     ("Box Jump", "Stand in front of a box. Bend your knees and jump onto the box, land softly, then step back down."),
 ];
 
+#[allow(unused)]
 fn generate_examples(db: &Db) -> Result<()> {
     for (name, instr) in EXAMPLE_VALUES {
         db.new_exercise(name, instr)?;
@@ -41,20 +39,10 @@ fn generate_examples(db: &Db) -> Result<()> {
     Ok(())
 }
 
-fn main() -> Result<()> {
-    let db = Db::init()?;
-    // let db = db.reset()?;
-    // generate_examples(&db)?;
-    // let my_plan = db.new_plan("tomato_plan", "extremely red plan", 12)?;
-    // for (i, id) in db
-    //     .get_all_exercises()?
-    //     .iter()
-    //     .enumerate()
-    // {
-    //     db.insert_exercise(my_plan, *id, (i as u16) * 3, i as u16)?
-    // }
-    let my_plan = Uuid::from_str("e0de36be-bdc1-439b-a54c-255d14ea11e7").unwrap();
-    let exercises = db.get_plan_exercises(my_plan)?;
-    println!("{:#?}", exercises);
-    Ok(())
+fn main() -> eframe::Result<()> {
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default(),
+        ..Default::default()
+    };
+    eframe::run_native("puwump", options, Box::new(|_| Ok(Box::new(PuwumpUi::default()))))
 }
