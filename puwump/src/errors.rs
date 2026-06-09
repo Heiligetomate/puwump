@@ -5,12 +5,13 @@ pub type Result<T> = std::result::Result<T, PuwumpError>;
 #[derive(Debug, Clone)]
 pub enum PuwumpError {
     HomeNotFound,
+    Ui(String),
     Rusqlite(String),
+    UniqueViolation,
     PathCreation,
     DbRemoval,
     UuidParse,
     RowNotFound,
-    Ui(String),
 }
 
 impl Display for PuwumpError {
@@ -23,6 +24,7 @@ impl Display for PuwumpError {
             Self::DbRemoval => write!(f, "error while delting the db file"),
             Self::UuidParse => write!(f, "uuid parse error"),
             Self::RowNotFound => write!(f, "row not found"),
+            Self::UniqueViolation => write!(f, "Exercise already exists"),
         }
     }
 }
@@ -34,8 +36,11 @@ impl Error for PuwumpError {
 }
 
 impl From<rusqlite::Error> for PuwumpError {
-    fn from(value: rusqlite::Error) -> Self {
-        Self::Rusqlite(value.to_string())
+    fn from(e: rusqlite::Error) -> Self {
+        match e {
+            rusqlite::Error::SqliteFailure(err, _) if err.code == rusqlite::ErrorCode::ConstraintViolation => PuwumpError::UniqueViolation,
+            _ => PuwumpError::Rusqlite(e.to_string()),
+        }
     }
 }
 

@@ -1,6 +1,9 @@
 use egui::{Color32, RichText, Ui};
 
-use crate::ui::{core::PuwumpUi, util::text_field};
+use crate::{
+    errors::PuwumpError,
+    ui::{core::PuwumpUi, util::text_field},
+};
 
 #[derive(Default)]
 pub struct AddExerciseForm {
@@ -56,7 +59,10 @@ impl PuwumpUi {
                     .new_exercise(&self.add_exercise.name, &self.add_exercise.instructions)
                 {
                     Ok(_) => self.add_exercise.status = Some(Ok(())),
-                    Err(e) => self.add_exercise.status = Some(Err(e.to_string())),
+                    Err(e) => match e {
+                        PuwumpError::UniqueViolation => self.add_exercise.status = Some(Err(e.to_string())),
+                        _ => panic!("db is broken"),
+                    },
                 }
             }
 
