@@ -1,6 +1,13 @@
-use egui::{Color32, Ui};
+use egui::{Color32, RichText, Ui};
 
 use crate::ui::{core::PuwumpUi, util::text_field};
+
+#[derive(Default)]
+pub struct AddExerciseForm {
+    pub name: String,
+    pub instructions: String,
+    pub status: Option<Result<(), String>>,
+}
 
 impl PuwumpUi {
     pub fn add_exercise_view(&mut self, ui: &mut Ui) {
@@ -44,7 +51,20 @@ impl PuwumpUi {
             ui.add_space(height * 0.02);
 
             if self.button(ui, inner_width * 0.5, height * 0.07, Color32::from_rgb(184, 187, 38), "Confirm") {
-                // TODO: save to db
+                match self
+                    .db
+                    .new_exercise(&self.add_exercise.name, &self.add_exercise.instructions)
+                {
+                    Ok(_) => self.add_exercise.status = Some(Ok(())),
+                    Err(e) => self.add_exercise.status = Some(Err(e.to_string())),
+                }
+            }
+
+            if let Some(status) = &self.add_exercise.status {
+                match status {
+                    Ok(_) => ui.label(RichText::new("Exercise saved!").color(Color32::from_rgb(184, 187, 38))),
+                    Err(e) => ui.label(RichText::new(e).color(Color32::from_rgb(204, 36, 29))),
+                };
             }
         });
     }

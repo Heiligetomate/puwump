@@ -39,10 +39,12 @@ fn generate_examples(db: &Db) -> Result<()> {
     Ok(())
 }
 
-fn main() -> eframe::Result<()> {
+fn main() -> Result<()> {
+    let _db = Db::init()?.reset()?;
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()
     };
-    eframe::run_native("puwump", options, Box::new(|_| Ok(Box::new(PuwumpUi::default()))))
+    eframe::run_native("puwump", options, Box::new(|_| Ok(Box::new(PuwumpUi::new()?))))?;
+    Ok(())
 }

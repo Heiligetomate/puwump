@@ -1,5 +1,7 @@
 use egui::{Color32, RichText, Ui};
 
+use crate::{db::Db, errors::Result, ui::add_exercise::AddExerciseForm};
+
 pub enum View {
     Default,
     AddExercise,
@@ -28,22 +30,18 @@ pub struct PuwumpUi {
     pub view: View,
     pub theme: Theme,
     pub add_exercise: AddExerciseForm,
+    pub db: Db,
 }
 
-impl Default for PuwumpUi {
-    fn default() -> Self {
-        Self {
+impl PuwumpUi {
+    pub fn new() -> Result<Self> {
+        Ok(Self {
             view: View::Default,
             theme: Theme::default(),
             add_exercise: AddExerciseForm::default(),
-        }
+            db: Db::init()?,
+        })
     }
-}
-
-#[derive(Default)]
-pub struct AddExerciseForm {
-    pub name: String,
-    pub instructions: String,
 }
 
 impl eframe::App for PuwumpUi {
