@@ -8,6 +8,7 @@ use crate::{
 };
 
 pub const DB_LOCATION: &str = "~/.local/share/puwump/puwump.db";
+pub const SQL_INIT: &str = include_str!("../../init.sql");
 
 pub struct Db {
     path: PathBuf,
@@ -24,14 +25,7 @@ impl Db {
     }
 
     pub fn create(&self) -> Result<()> {
-        let _ = self.con.execute(
-            "CREATE TABLE IF NOT EXISTS person (
-            id   INTEGER PRIMARY KEY,
-            name TEXT NOT NULL,
-            data BLOB
-            )",
-            (),
-        )?;
+        self.con.execute_batch(SQL_INIT)?;
 
         Ok(())
     }
@@ -40,5 +34,12 @@ impl Db {
         remove_file(&self.path).map_err(|_| PuwumpError::DbRemoval)?;
 
         Ok(())
+    }
+
+    pub fn reset(self) -> Result<Self> {
+        self.delete()?;
+        let db = Self::init()?;
+        db.create()?;
+        Ok(db)
     }
 }

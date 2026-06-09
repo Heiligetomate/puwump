@@ -6,6 +6,6 @@ use crate::{db::Db, errors::Result};
 
 fn main() -> Result<()> {
     let db = Db::init()?;
-    db.create()?;
+    db.reset()?;
     Ok(())
 }
