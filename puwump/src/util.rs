@@ -3,6 +3,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use rusqlite::Statement;
+use uuid::Uuid;
+
 use crate::{
     db::DB_LOCATION,
     errors::{PuwumpError, Result},
@@ -23,4 +26,14 @@ pub fn create_dirs_to_path(path: &Path) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn ids_from_statement(mut stmt: Statement) -> Result<Vec<Uuid>> {
+    let ids = stmt
+        .query_map([], |row| row.get(0))?
+        .collect::<rusqlite::Result<Vec<String>>>()?;
+
+    ids.iter()
+        .map(|id| Uuid::parse_str(id).map_err(|_| PuwumpError::UuidParse))
+        .collect()
 }

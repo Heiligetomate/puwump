@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS exercise (
-    id    TEXT PRIMARY KEY,
-    name  TEXT NOT NULL
+    id            TEXT PRIMARY KEY,
+    instructions  TEXT NOT NULL,
+    name          TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS plan (

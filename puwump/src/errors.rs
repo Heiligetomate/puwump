@@ -8,6 +8,8 @@ pub enum PuwumpError {
     Rusqlite(String),
     PathCreation,
     DbRemoval,
+    UuidParse,
+    RowNotFound,
 }
 
 impl Display for PuwumpError {
@@ -17,6 +19,8 @@ impl Display for PuwumpError {
             Self::HomeNotFound => write!(f, "Home env not found"),
             Self::PathCreation => write!(f, "error while creating a path"),
             Self::DbRemoval => write!(f, "error while delting the db file"),
+            Self::UuidParse => write!(f, "uuid parse error"),
+            Self::RowNotFound => write!(f, "row not found"),
         }
     }
 }
