@@ -46,6 +46,6 @@ fn main() -> Result<()> {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()
     };
-    eframe::run_native("puwump", options, Box::new(|_| Ok(Box::new(PuwumpUi::new()?))))?;
+    eframe::run_native("puwump", options, Box::new(|cc| Ok(Box::new(PuwumpUi::new(cc)?))))?;
     Ok(())
 }

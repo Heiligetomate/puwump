@@ -1,6 +1,12 @@
+use eframe::CreationContext;
 use egui::{Color32, RichText, Ui};
 
-use crate::{db::Db, errors::Result, models::Exercise, ui::add_exercise::AddExerciseForm};
+use crate::{
+    db::Db,
+    errors::Result,
+    models::Exercise,
+    ui::{add_exercise::AddExerciseForm, sizes::SizeSheet, theme::Theme},
+};
 
 pub enum View {
     Default,
@@ -9,38 +15,23 @@ pub enum View {
     Workout,
 }
 
-pub struct Theme {
-    pub fg: Color32,
-    pub title: Color32,
-    pub corner_radius: f32,
-}
-
-impl Default for Theme {
-    fn default() -> Self {
-        let _bg = Color32::from_rgb(40, 40, 40);
-        let fg = Color32::from_rgb(235, 219, 178);
-        let title = Color32::from_rgb(250, 189, 47);
-        let corner_radius = 16.0;
-
-        Self { fg, corner_radius, title }
-    }
-}
-
 pub struct PuwumpUi {
     pub view: View,
     pub theme: Theme,
+    pub sizes: SizeSheet,
     pub add_exercise: AddExerciseForm,
     pub exercises: Vec<Exercise>,
     pub db: Db,
 }
 
 impl PuwumpUi {
-    pub fn new() -> Result<Self> {
+    pub fn new(cc: &CreationContext) -> Result<Self> {
         Ok(Self {
             view: View::Default,
             theme: Theme::default(),
-            exercises: Vec::new(),
+            sizes: SizeSheet::new(cc),
             add_exercise: AddExerciseForm::default(),
+            exercises: Vec::new(),
             db: Db::init()?,
         })
     }
@@ -52,6 +43,8 @@ impl eframe::App for PuwumpUi {
         let full_width = full_rect.width();
         let full_height = full_rect.height();
         let header_height = full_height * 0.09;
+
+        self.sizes.update(ui);
 
         let header_rect = egui::Rect::from_min_size(full_rect.min, egui::vec2(full_width, header_height));
         let content_rect = egui::Rect::from_min_max(egui::pos2(full_rect.min.x, full_rect.min.y + header_height), full_rect.max);
@@ -96,7 +89,7 @@ impl PuwumpUi {
                 button_rect,
                 egui::Button::new(RichText::new("Home").color(self.theme.fg))
                     .fill(Color32::from_rgb(60, 56, 54))
-                    .corner_radius(self.theme.corner_radius),
+                    .corner_radius(self.sizes.corner_radius),
             )
             .clicked()
         {

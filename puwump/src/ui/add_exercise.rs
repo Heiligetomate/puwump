@@ -32,9 +32,10 @@ impl AddExerciseForm {
 
 impl PuwumpUi {
     pub fn add_exercise_view(&mut self, ui: &mut Ui) {
-        let width = ui.available_width();
-        let height = ui.available_height();
-        let margin = width * 0.05;
+        let width = self.sizes.width;
+        let height = self.sizes.height;
+        let margin = self.sizes.margin;
+
         let inner_margin = (width * 0.02) as i8;
         let form_width = width * 0.4;
         let list_width = width * 0.55 - margin * 2.0;
@@ -47,7 +48,7 @@ impl PuwumpUi {
         ui.add_space(height * 0.05);
         ui.horizontal(|ui| {
             ui.add_space(margin);
-            self.exercise_form(ui, form_width, height, inner_margin);
+            self.exercise_form(ui, form_width, height);
             ui.add_space(margin);
             ui.separator();
             ui.add_space(margin);
@@ -55,11 +56,11 @@ impl PuwumpUi {
         });
     }
 
-    fn exercise_form(&mut self, ui: &mut Ui, form_width: f32, height: f32, inner_margin: i8) {
+    fn exercise_form(&mut self, ui: &mut Ui, form_width: f32, height: f32) {
         ui.vertical(|ui| {
             ui.set_width(form_width);
 
-            text_field(ui, inner_margin, |ui| {
+            text_field(ui, &self.theme, &self.sizes, |ui| {
                 ui.add(
                     egui::TextEdit::singleline(&mut self.add_exercise.name)
                         .hint_text("Name")
@@ -68,7 +69,7 @@ impl PuwumpUi {
                 );
             });
             ui.add_space(height * 0.02);
-            text_field(ui, inner_margin, |ui| {
+            text_field(ui, &self.theme, &self.sizes, |ui| {
                 ui.add(
                     egui::TextEdit::multiline(&mut self.add_exercise.instructions)
                         .hint_text("Instructions")
@@ -79,7 +80,7 @@ impl PuwumpUi {
             });
             ui.add_space(height * 0.02);
 
-            if self.button(ui, form_width, height * 0.07, Color32::from_rgb(184, 187, 38), "Confirm") {
+            if self.button(ui, form_width, height * 0.07, self.theme.green, "Confirm") {
                 self.on_exercise_confirm();
             }
 

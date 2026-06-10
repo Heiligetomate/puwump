@@ -1,6 +1,10 @@
 use egui::{Color32, RichText, Ui};
 
-use crate::ui::core::{PuwumpUi, View};
+use crate::ui::{
+    core::{PuwumpUi, View},
+    sizes::SizeSheet,
+    theme::Theme,
+};
 
 impl PuwumpUi {
     pub fn button(&mut self, ui: &mut Ui, available_width: f32, button_height: f32, color: Color32, title: &str) -> bool {
@@ -12,9 +16,14 @@ impl PuwumpUi {
                     .strong(),
             )
             .fill(color)
-            .corner_radius(self.theme.corner_radius),
+            .corner_radius(self.sizes.corner_radius),
         )
         .clicked()
+    }
+
+    pub fn button_full_width(&mut self, ui: &mut Ui, button_height: f32, color: Color32, title: &str) -> bool {
+        let available_width = ui.available_width() - self.sizes.margin * 2.0;
+        self.button(ui, available_width, button_height, color, title)
     }
 
     pub fn get_title(&self) -> &str {
@@ -38,18 +47,18 @@ impl PuwumpUi {
             .hovered
             .bg_stroke = egui::Stroke::NONE;
     }
+
+    pub fn calc_button_height(&self, ui: &Ui, cnt: u8) -> f32 {
+        let height = ui.available_height();
+        (height - self.sizes.margin * 2.0 - self.sizes.spacing * 2.0) / cnt as f32
+    }
 }
 
-pub fn text_field(ui: &mut Ui, inner_margin: i8, add_contents: impl FnOnce(&mut Ui)) {
+pub fn text_field(ui: &mut Ui, theme: &Theme, sizes: &SizeSheet, add_contents: impl FnOnce(&mut Ui)) {
     egui::Frame::NONE
-        .fill(Color32::from_rgb(60, 56, 54))
-        .corner_radius(12.0)
-        .inner_margin(egui::Margin {
-            left: inner_margin,
-            right: inner_margin,
-            top: inner_margin,
-            bottom: inner_margin,
-        })
+        .fill(theme.text_field)
+        .corner_radius(sizes.corner_radius)
+        .inner_margin(egui::Margin::same(sizes.margin as i8))
         .show(ui, |ui| {
             add_contents(ui);
         });
