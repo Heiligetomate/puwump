@@ -1,5 +1,5 @@
 use eframe::CreationContext;
-use egui::{Color32, RichText, Ui};
+use egui::{Button, RichText, Ui};
 
 use crate::{
     db::Db,
@@ -68,7 +68,7 @@ impl PuwumpUi {
 
     pub fn header(&mut self, ui: &mut Ui, full_width: f32, full_height: f32) {
         let header_height = full_height * 0.09;
-        let margin = full_width * 0.02;
+        let margin = self.sizes.margin;
         let button_height = header_height * 0.55;
         let button_width = full_width * 0.12;
         let font_size = header_height * 0.55;
@@ -76,27 +76,22 @@ impl PuwumpUi {
         let rect = ui.available_rect_before_wrap();
 
         ui.painter()
-            .rect_filled(rect, 0.0, Color32::from_rgb(50, 48, 47));
+            .rect_filled(rect, 0.0, self.theme.header_bg);
 
         ui.painter()
             .text(rect.center(), egui::Align2::CENTER_CENTER, self.get_title(), egui::FontId::proportional(font_size), self.theme.title);
 
         let button_rect = egui::Rect::from_min_size(rect.min + egui::vec2(margin, (header_height - button_height) / 2.0), egui::vec2(button_width, button_height));
 
-        let mut go_home = false;
         if ui
             .put(
                 button_rect,
-                egui::Button::new(RichText::new("Home").color(self.theme.fg))
-                    .fill(Color32::from_rgb(60, 56, 54))
+                Button::new(RichText::new("Home").color(self.theme.fg))
+                    .fill(self.theme.text_field)
                     .corner_radius(self.sizes.corner_radius),
             )
             .clicked()
         {
-            go_home = true;
-        }
-
-        if go_home {
             self.view = View::Default;
         }
     }

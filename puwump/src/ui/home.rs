@@ -7,6 +7,8 @@ impl PuwumpUi {
         println!("{} {}", self.sizes.height, ui.available_height());
         let button_height = self.calc_button_height(ui, 3);
 
+        let spc = self.spacing(ui);
+
         ui.add_space(self.sizes.margin);
         ui.vertical_centered(|ui| {
             if self.button_full_width(ui, button_height, self.theme.blue, "Add Exercise") {
@@ -17,12 +19,12 @@ impl PuwumpUi {
                     .unwrap_or_default();
             }
 
-            ui.add_space(self.sizes.spacing);
+            ui.add_space(spc);
             if self.button_full_width(ui, button_height, self.theme.green, "Add Plan") {
                 self.view = View::AddPlan;
             }
 
-            ui.add_space(self.sizes.spacing);
+            ui.add_space(spc);
             if self.button_full_width(ui, button_height, self.theme.red, "Workout") {
                 self.view = View::Workout;
             }

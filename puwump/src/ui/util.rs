@@ -50,7 +50,12 @@ impl PuwumpUi {
 
     pub fn calc_button_height(&self, ui: &Ui, cnt: u8) -> f32 {
         let height = ui.available_height();
-        (height - self.sizes.margin * 2.0 - self.sizes.spacing * 2.0) / cnt as f32
+        let spacing = self.spacing(ui);
+        (height - self.sizes.margin * 2.0 - spacing * (cnt - 1) as f32) / cnt as f32
+    }
+
+    pub fn spacing(&self, ui: &Ui) -> f32 {
+        self.sizes.spc_mlt * ui.available_height()
     }
 }
 
