@@ -19,6 +19,10 @@ impl PuwumpUi {
         ui.vertical_centered(|ui| {
             if self.button(ui, button_width, button_height, blue, "Add Exercise") {
                 self.view = View::AddExercise;
+                self.exercises = self
+                    .db
+                    .get_all_exercises()
+                    .unwrap_or_default();
             }
             ui.add_space(spacing);
             if self.button(ui, button_width, button_height, green, "Add Plan") {

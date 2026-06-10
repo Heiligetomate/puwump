@@ -25,7 +25,6 @@ impl AddExerciseForm {
         }
         false
     }
-
     fn set_err(&mut self, message: &str) {
         self.status = Some(Err(message.to_owned()));
     }
