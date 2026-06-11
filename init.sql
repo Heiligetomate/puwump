@@ -36,16 +36,17 @@ CREATE TABLE IF NOT EXISTS meal (
 );
 
 CREATE TABLE IF NOT EXISTS ingredient (
-    name    TEXT PRIMARY KEY
+    name  TEXT NOT NULL UNIQUE,
+    id    TEXT PRIMARY KEY
 );
 
 create TABLE IF NOT EXISTS ingredient_in_meal (
     amount_gr       INTEGER NOT NULL,
     meal_name       TEXT NOT NULL,
-    ingredient_name TEXT NOT NULL,
-    PRIMARY KEY     (meal_name, ingredient_name),
+    ingredient_id   TEXT NOT NULL,
+    PRIMARY KEY     (meal_name, ingredient_id),
     FOREIGN KEY     (meal_name)       REFERENCES meal(name),
-    FOREIGN KEY     (ingredient_name) REFERENCES ingredient(name)
+    FOREIGN KEY     (ingredient_id) REFERENCES ingredient(id)
 );
 
 create TABLE IF NOT EXISTS meal_inhaled (

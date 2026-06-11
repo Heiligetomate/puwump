@@ -1,7 +1,10 @@
+use uuid::Uuid;
+
 use crate::models::core::Model;
 
 #[derive(Debug)]
 pub struct Ingredient {
+    pub id: Uuid,
     pub name: String,
 }
 
@@ -20,7 +23,11 @@ pub struct MealIngredientDetail {
 
 impl Model for Ingredient {
     fn from_row(row: &rusqlite::Row) -> rusqlite::Result<Self> {
-        Ok(Self { name: row.get(0)? })
+        let id: String = row.get(1)?;
+        Ok(Self {
+            name: row.get(0)?,
+            id: Uuid::parse_str(&id).map_err(|_| rusqlite::Error::InvalidQuery)?,
+        })
     }
 }
 
@@ -36,8 +43,12 @@ impl Model for Meal {
 
 impl Model for MealIngredientDetail {
     fn from_row(row: &rusqlite::Row) -> rusqlite::Result<Self> {
+        let id: String = row.get(1)?;
         Ok(Self {
-            ingredient: Ingredient { name: row.get(0)? },
+            ingredient: Ingredient {
+                name: row.get(0)?,
+                id: Uuid::parse_str(&id).map_err(|_| rusqlite::Error::InvalidQuery)?,
+            },
             amount_gr: row.get(1)?,
         })
     }

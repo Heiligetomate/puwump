@@ -4,13 +4,14 @@ use egui::{Button, RichText, Ui};
 use crate::{
     db::Db,
     errors::Result,
-    models::Exercise,
-    ui::{add_exercise::AddExerciseForm, sizes::SizeSheet, theme::Theme},
+    models::{Exercise, Ingredient},
+    ui::{add_task::AddTaskHandler, sizes::SizeSheet, theme::Theme},
 };
 
 pub enum View {
     Default,
     AddExercise,
+    AddIngredient,
     AddPlan,
     Workout,
 }
@@ -19,8 +20,8 @@ pub struct PuwumpUi {
     pub view: View,
     pub theme: Theme,
     pub sizes: SizeSheet,
-    pub add_exercise: AddExerciseForm,
-    pub exercises: Vec<Exercise>,
+    pub exercise_hndl: AddTaskHandler<Exercise>,
+    pub ingredient_hdnl: AddTaskHandler<Ingredient>,
     pub db: Db,
 }
 
@@ -30,8 +31,8 @@ impl PuwumpUi {
             view: View::Default,
             theme: Theme::default(),
             sizes: SizeSheet::new(cc),
-            add_exercise: AddExerciseForm::default(),
-            exercises: Vec::new(),
+            exercise_hndl: AddTaskHandler::default(),
+            ingredient_hdnl: AddTaskHandler::default(),
             db: Db::init()?,
         })
     }
@@ -57,6 +58,7 @@ impl eframe::App for PuwumpUi {
             View::AddExercise => self.add_exercise_view(ui),
             View::AddPlan => self.add_plan_view(ui),
             View::Workout => self.work_out_view(ui),
+            View::AddIngredient => self.add_ingredient_view(ui),
         });
     }
 }

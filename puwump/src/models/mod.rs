@@ -1,3 +1,4 @@
+pub mod add_model;
 pub mod core;
 pub mod exercise;
 mod food;

@@ -4,7 +4,7 @@ use crate::ui::core::{PuwumpUi, View};
 
 impl PuwumpUi {
     pub fn home_view(&mut self, ui: &mut Ui) {
-        let button_height = self.calc_button_height(ui, 3);
+        let button_height = self.calc_button_height(ui, 4);
 
         let spc = self.spacing(ui);
 
@@ -12,7 +12,7 @@ impl PuwumpUi {
         ui.vertical_centered(|ui| {
             if self.button_full_width(ui, button_height, self.theme.blue, "Add Exercise") {
                 self.view = View::AddExercise;
-                self.exercises = self
+                self.exercise_hndl.data = self
                     .db
                     .get_all_exercises()
                     .unwrap_or_default();
@@ -26,6 +26,11 @@ impl PuwumpUi {
             ui.add_space(spc);
             if self.button_full_width(ui, button_height, self.theme.red, "Workout") {
                 self.view = View::Workout;
+            }
+
+            ui.add_space(spc);
+            if self.button_full_width(ui, button_height, self.theme.red, "Add Ingredient") {
+                self.view = View::AddIngredient;
             }
         });
     }

@@ -1,4 +1,4 @@
-use egui::{Color32, RichText, Ui};
+use egui::{Align, Button, Color32, Layout, RichText, Ui};
 
 use crate::ui::{
     core::{PuwumpUi, View},
@@ -32,6 +32,7 @@ impl PuwumpUi {
             View::AddExercise => "Add Exercise",
             View::Default => "Puwump - Home",
             View::Workout => "Workout",
+            View::AddIngredient => "Add ingredient",
         }
     }
 
@@ -56,6 +57,28 @@ impl PuwumpUi {
 
     pub fn spacing(&self, ui: &Ui) -> f32 {
         self.sizes.spc_mlt * ui.available_height()
+    }
+
+    /// Creates a small red round delete button with a X
+    pub fn delete_button(&self, ui: &mut Ui) -> bool {
+        let mut clicked = false;
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            if ui
+                .add(
+                    Button::new(
+                        RichText::new("X")
+                            .color(self.theme.white)
+                            .size(12.0),
+                    )
+                    .fill(self.theme.red)
+                    .corner_radius(self.sizes.corner_radius),
+                )
+                .clicked()
+            {
+                clicked = true;
+            }
+        });
+        clicked
     }
 }
 
