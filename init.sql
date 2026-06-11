@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS ingredient (
 );
 
 create TABLE IF NOT EXISTS ingredient_in_meal (
-    amount          INTEGER NOT NULL,
+    amount_gr       INTEGER NOT NULL,
     meal_name       TEXT NOT NULL,
     ingredient_name TEXT NOT NULL,
     PRIMARY KEY     (meal_name, ingredient_name),
