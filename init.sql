@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS plan_exercise (
     order_index INTEGER NOT NULL,
     reps        INTEGER,
     PRIMARY KEY (plan_id, exercise_id),
-    FOREIGN KEY (plan_id)     REFERENCES workout_plan(id),
+    FOREIGN KEY (plan_id)     REFERENCES plan(id),
     FOREIGN KEY (exercise_id) REFERENCES exercise(id)
 );
 
@@ -45,7 +45,9 @@ create TABLE IF NOT EXISTS ingredient_in_meal (
     ingredient_name TEXT NOT NULL,
     PRIMARY KEY     (meal_name, ingredient_name),
     FOREIGN KEY     (meal_name) REFERENCES meal(name),
-    FOREIGN KEY     (ingredient_name) REFERENCES ingredient(name)
+    FOREIGN KEY     (ingredient_name) REFERENCES ingredient(name),
+    CHECK(ingredient(name)),
+    CHECK(meal(name))
 );
 
 create TABLE IF NOT EXISTS meal_inhaled (
