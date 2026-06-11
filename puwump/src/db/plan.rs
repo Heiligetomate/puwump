@@ -1,6 +1,8 @@
 use rusqlite::params;
 use uuid::Uuid;
 
+// TODO: (for all deletes basically) "dependencies" have to be deleted
+
 use crate::{
     db::Db,
     errors::{PuwumpError, Result},
