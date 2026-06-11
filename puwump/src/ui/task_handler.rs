@@ -1,4 +1,4 @@
-use crate::models::{Exercise, Ingredient, add_model::CardAdd, core::Model};
+use crate::models::{CardAdd, Exercise, Ingredient, core::Model};
 
 pub struct AddTaskHandler<A: Model + CardAdd> {
     pub data: Vec<A>,

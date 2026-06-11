@@ -1,10 +1,11 @@
-pub mod add_model;
+pub mod card_compatible;
 pub mod core;
 pub mod exercise;
 mod food;
 pub mod plan;
 mod plan_exercise;
 
+pub use card_compatible::CardAdd;
 pub use exercise::Exercise;
 pub use food::Ingredient;
 pub use food::Meal;

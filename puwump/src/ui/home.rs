@@ -19,6 +19,15 @@ impl PuwumpUi {
             }
 
             ui.add_space(spc);
+            if self.button_full_width(ui, button_height, self.theme.blue, "Add Ingredient") {
+                self.view = View::AddIngredient;
+                self.ingredient_hdnl.data = self
+                    .db
+                    .get_all_ingredients()
+                    .unwrap_or_default()
+            }
+
+            ui.add_space(spc);
             if self.button_full_width(ui, button_height, self.theme.green, "Add Plan") {
                 self.view = View::AddPlan;
             }
@@ -26,11 +35,6 @@ impl PuwumpUi {
             ui.add_space(spc);
             if self.button_full_width(ui, button_height, self.theme.red, "Workout") {
                 self.view = View::Workout;
-            }
-
-            ui.add_space(spc);
-            if self.button_full_width(ui, button_height, self.theme.red, "Add Ingredient") {
-                self.view = View::AddIngredient;
             }
         });
     }

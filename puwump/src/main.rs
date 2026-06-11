@@ -40,7 +40,6 @@ fn generate_examples(db: &Db) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let db = Db::init()?.reset()?;
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()

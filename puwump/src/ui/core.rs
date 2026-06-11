@@ -5,7 +5,7 @@ use crate::{
     db::Db,
     errors::Result,
     models::{Exercise, Ingredient},
-    ui::{add_task::AddTaskHandler, sizes::SizeSheet, theme::Theme},
+    ui::{sizes::SizeSheet, task_handler::AddTaskHandler, theme::Theme},
 };
 
 pub enum View {
