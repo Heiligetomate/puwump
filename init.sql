@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS completed_workout (
 
 CREATE TABLE IF NOT EXISTS meal (
     name        TEXT PRIMARY KEY,
-    kalorien    INTEGER NOT NULL,
+    calories    INTEGER NOT NULL,
     description TEXT NOT NULL
 );
 
@@ -40,16 +40,16 @@ CREATE TABLE IF NOT EXISTS ingredient (
 );
 
 create TABLE IF NOT EXISTS ingredient_in_meal (
-    anzahl        INTEGER NOT NULL,
-    mahlzeit_name TEXT NOT NULL,
-    zutat_name    TEXT NOT NULL,
-    PRIMARY KEY   (mahlzeit_name, zutat_name),
-    FOREIGN KEY   (mahlzeit_name) REFERENCES mahlzeit(name),
-    FOREIGN KEY   (zutat_name)    REFERENCES zutat(name)
+    amount          INTEGER NOT NULL,
+    meal_name       TEXT NOT NULL,
+    ingredient_name TEXT NOT NULL,
+    PRIMARY KEY     (meal_name, ingredient_name),
+    FOREIGN KEY     (meal_name) REFERENCES meal(name),
+    FOREIGN KEY     (ingredient_name) REFERENCES ingredient(name)
 );
 
 create TABLE IF NOT EXISTS meal_inhaled (
-    date  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    mahlzeit_name  TEXT NOT NULL, 
-    FOREIGN KEY (mahlzeit_name) REFERENCES mahlzeit(name)
+    date        TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    meal_name   TEXT NOT NULL, 
+    FOREIGN KEY (meal_name) REFERENCES meal(name)
 )
