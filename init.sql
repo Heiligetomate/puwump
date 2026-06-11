@@ -48,7 +48,7 @@ create TABLE IF NOT EXISTS ingredient_in_meal (
     FOREIGN KEY   (zutat_name)    REFERENCES zutat(name)
 );
 
-create TABLE IF NOT EXISTS meal_gemampft (
+create TABLE IF NOT EXISTS meal_inhaled (
     date  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     mahlzeit_name  TEXT NOT NULL, 
     FOREIGN KEY (mahlzeit_name) REFERENCES mahlzeit(name)
