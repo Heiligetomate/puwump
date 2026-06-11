@@ -41,11 +41,11 @@ fn generate_examples(db: &Db) -> Result<()> {
 
 fn main() -> Result<()> {
     let db = Db::init()?.reset()?;
-    generate_examples(&db)?;
-    let options = eframe::NativeOptions {
-        viewport: egui::ViewportBuilder::default(),
-        ..Default::default()
-    };
-    eframe::run_native("puwump", options, Box::new(|cc| Ok(Box::new(PuwumpUi::new(cc)?))))?;
+    // generate_examples(&db)?;
+    // let options = eframe::NativeOptions {
+    //     viewport: egui::ViewportBuilder::default(),
+    //     ..Default::default()
+    // };
+    // eframe::run_native("puwump", options, Box::new(|cc| Ok(Box::new(PuwumpUi::new(cc)?))))?;
     Ok(())
 }
