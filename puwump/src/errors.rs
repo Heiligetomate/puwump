@@ -12,6 +12,7 @@ pub enum PuwumpError {
     DbRemoval,
     UuidParse,
     RowNotFound,
+    ForeignKeyViolation,
 }
 
 impl Display for PuwumpError {
@@ -25,6 +26,7 @@ impl Display for PuwumpError {
             Self::UuidParse => write!(f, "uuid parse error"),
             Self::RowNotFound => write!(f, "row not found"),
             Self::UniqueViolation => write!(f, "Exercise already exists"),
+            Self::ForeignKeyViolation => write!(f, "Foreign key doesnt exist"),
         }
     }
 }

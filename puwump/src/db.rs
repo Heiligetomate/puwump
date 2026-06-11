@@ -1,6 +1,7 @@
+use core::ffi;
 use std::{fs::remove_file, path::PathBuf};
 
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, ErrorCode, params};
 use uuid::Uuid;
 
 use crate::{
@@ -25,15 +26,16 @@ impl Db {
     pub fn init() -> Result<Self> {
         let full: PathBuf = get_full_db_path()?;
         create_dirs_to_path(&full)?;
-
         let con = Connection::open(&full)?;
+        con.pragma_update(None, "foreign_keys", "on")?;
+
         Ok(Self { path: full, con })
     }
 
-    pub fn create(&self) -> Result<()> {
+    pub fn create(self) -> Result<Self> {
         self.con.execute_batch(SQL_INIT)?;
 
-        Ok(())
+        Ok(self)
     }
 
     pub fn delete(self) -> Result<()> {
@@ -45,8 +47,7 @@ impl Db {
     pub fn reset(self) -> Result<Self> {
         self.delete()?;
         let db = Self::init()?;
-        db.create()?;
-        Ok(db)
+        db.create()
     }
 
     pub fn new_exercise(&self, name: &str, instructions: &str) -> Result<()> {
@@ -58,8 +59,10 @@ impl Db {
 
     pub fn new_plan(&self, name: &str, description: &str, est_min: u16) -> Result<Uuid> {
         let id = Uuid::new_v4();
-        self.con
-            .execute("INSERT INTO plan (id, name, description, est_mins)  VALUES (?1, ?2, ?3, ?4)", params![id.to_string(), name, description, est_min])?;
+        self.con.execute(
+            "INSERT INTO plan (id, name, description, est_mins)  VALUES (?1, ?2, ?3, ?4)",
+            params![id.to_string(), name, description, est_min],
+        )?;
 
         Ok(id)
     }
@@ -152,16 +155,31 @@ impl Db {
     }
 
     pub fn insert_meal(&self, name: &str, description: &str, calories: u32) -> Result<()> {
-        self.con
-            .execute("INSERT INTO meal (name, description, calories) VALUES (?1, ?2, ?3)", params![name.to_owned(), description.to_owned(), calories])?;
+        self.con.execute(
+            "INSERT INTO meal (name, description, calories) VALUES (?1, ?2, ?3)",
+            params![name.to_owned(), description.to_owned(), calories],
+        )?;
         Ok(())
     }
 
     pub fn insert_meal_ingredient(&self, meal_name: &str, ingredient_name: &str, amount: u32) -> Result<()> {
-        self.con.execute(
-            "INSERT INTO ingredient_in_meal (amount_gr, meal_name, ingredient_name) VALUES (?1, ?2, ?3)",
-            params![amount, meal_name.to_owned(), ingredient_name.to_owned()],
-        )?;
+        self.con
+            .execute(
+                "INSERT INTO ingredient_in_meal (amount_gr, meal_name, ingredient_name) VALUES (?1, ?2, ?3)",
+                params![amount, meal_name, ingredient_name],
+            )
+            .map_err(Self::map_sqlite_err)?;
         Ok(())
+    }
+
+    fn map_sqlite_err(e: rusqlite::Error) -> PuwumpError {
+        match e {
+            rusqlite::Error::SqliteFailure(e, _) => match e.extended_code {
+                1555 | 2067 => PuwumpError::UniqueViolation,
+                787 => PuwumpError::ForeignKeyViolation,
+                _ => PuwumpError::Rusqlite(e.to_string()),
+            },
+            _ => PuwumpError::Rusqlite(e.to_string()),
+        }
     }
 }

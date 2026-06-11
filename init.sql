@@ -44,10 +44,8 @@ create TABLE IF NOT EXISTS ingredient_in_meal (
     meal_name       TEXT NOT NULL,
     ingredient_name TEXT NOT NULL,
     PRIMARY KEY     (meal_name, ingredient_name),
-    FOREIGN KEY     (meal_name) REFERENCES meal(name),
-    FOREIGN KEY     (ingredient_name) REFERENCES ingredient(name),
-    CHECK(ingredient(name)),
-    CHECK(meal(name))
+    FOREIGN KEY     (meal_name)       REFERENCES meal(name),
+    FOREIGN KEY     (ingredient_name) REFERENCES ingredient(name)
 );
 
 create TABLE IF NOT EXISTS meal_inhaled (

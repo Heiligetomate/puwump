@@ -40,9 +40,9 @@ fn generate_examples(db: &Db) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let db = Db::init()?.reset()?;
-    db.insert_ingredient("fuß")?;
-    db.insert_meal("fußsuppe", "leicht käsig", 2)?;
+    let db = Db::init()?.create()?;
+    // db.insert_ingredient("fuß")?;
+    // db.insert_meal("fußsuppe", "leicht käsig", 2)?;
     db.insert_meal_ingredient("fußsuppe", "fuß", 3)?;
     // generate_examples(&db)?;
     // let options = eframe::NativeOptions {
