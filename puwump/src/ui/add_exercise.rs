@@ -1,4 +1,5 @@
-use egui::{Color32, RichText, Ui};
+use egui::{Align, Button, Color32, Layout, RichText, Ui};
+use uuid::Uuid;
 
 use crate::{
     errors::PuwumpError,
@@ -20,11 +21,9 @@ impl AddExerciseForm {
     }
 
     fn is_empty(&self) -> bool {
-        if self.name.is_empty() || self.instructions.is_empty() {
-            return true;
-        }
-        false
+        self.name.is_empty() || self.instructions.is_empty()
     }
+
     fn set_err(&mut self, message: &str) {
         self.status = Some(Err(message.to_owned()));
     }
@@ -35,8 +34,7 @@ impl PuwumpUi {
         let width = self.sizes.width;
         let height = self.sizes.height;
         let margin = self.sizes.margin;
-
-        let inner_margin = (width * 0.02) as i8;
+        let inner_margin = (width * 0.01) as i8;
         let form_width = width * 0.4;
         let list_width = width * 0.55 - margin * 2.0;
 
@@ -46,48 +44,60 @@ impl PuwumpUi {
             .insert(egui::TextStyle::Body, egui::FontId::proportional(height * 0.03));
 
         ui.add_space(height * 0.05);
+        let available_height = ui.available_height();
+
         ui.horizontal(|ui| {
             ui.add_space(margin);
             self.exercise_form(ui, form_width, height);
             ui.add_space(margin);
             ui.separator();
             ui.add_space(margin);
-            self.exercise_list(ui, list_width, height, margin, inner_margin);
+            if let Some(id) = self.exercise_list(ui, list_width, available_height, inner_margin) {
+                self.db.remove_exercise(id).unwrap();
+                self.exercises = self
+                    .db
+                    .get_all_exercises()
+                    .unwrap_or_default();
+            }
         });
     }
 
+    /// Full add-exercise form
     fn exercise_form(&mut self, ui: &mut Ui, form_width: f32, height: f32) {
         ui.vertical(|ui| {
             ui.set_width(form_width);
-
-            text_field(ui, &self.theme, &self.sizes, |ui| {
-                ui.add(
-                    egui::TextEdit::singleline(&mut self.add_exercise.name)
-                        .hint_text("Name")
-                        .desired_width(f32::INFINITY)
-                        .background_color(Color32::TRANSPARENT),
-                );
-            });
+            self.exercise_form_fields(ui, form_width);
             ui.add_space(height * 0.02);
-            text_field(ui, &self.theme, &self.sizes, |ui| {
-                ui.add(
-                    egui::TextEdit::multiline(&mut self.add_exercise.instructions)
-                        .hint_text("Instructions")
-                        .desired_width(f32::INFINITY)
-                        .desired_rows(6)
-                        .background_color(Color32::TRANSPARENT),
-                );
-            });
-            ui.add_space(height * 0.02);
-
             if self.button(ui, form_width, height * 0.07, self.theme.green, "Confirm") {
                 self.on_exercise_confirm();
             }
-
             self.exercise_status(ui);
         });
     }
 
+    /// Creates the fields needed to create a new eercise  
+    fn exercise_form_fields(&mut self, ui: &mut Ui, height: f32) {
+        text_field(ui, &self.theme, &self.sizes, |ui| {
+            ui.add(
+                egui::TextEdit::singleline(&mut self.add_exercise.name)
+                    .hint_text("Name")
+                    .desired_width(f32::INFINITY)
+                    .background_color(Color32::TRANSPARENT),
+            );
+        });
+        ui.add_space(height * 0.02);
+        text_field(ui, &self.theme, &self.sizes, |ui| {
+            ui.add(
+                egui::TextEdit::multiline(&mut self.add_exercise.instructions)
+                    .hint_text("Instructions")
+                    .desired_width(f32::INFINITY)
+                    .desired_rows(6)
+                    .background_color(Color32::TRANSPARENT),
+            );
+        });
+    }
+
+    /// Handles the input when the confirm button for the exercises is pressed
     fn on_exercise_confirm(&mut self) {
         if self.add_exercise.is_empty() {
             self.add_exercise
@@ -96,7 +106,7 @@ impl PuwumpUi {
         }
         match self
             .db
-            .new_exercise(&self.add_exercise.name, &self.add_exercise.instructions)
+            .insert_exercise(&self.add_exercise.name, &self.add_exercise.instructions)
         {
             Ok(_) => {
                 self.add_exercise.status = Some(Ok(()));
@@ -107,63 +117,101 @@ impl PuwumpUi {
                     .unwrap_or_default();
             }
             Err(PuwumpError::UniqueViolation) => {
-                self.add_exercise.status = Some(Err("Exercise name already exists".to_string()));
+                self.add_exercise
+                    .set_err("Exercise already exists");
             }
             Err(_) => panic!("db is broken"),
         }
     }
 
+    /// Does not do anything (returns) if the exercise status is None
+    /// Adds a green text "Exercise saved!" if the stuats is Ok()
+    /// Adds a red text with the error message if the status is Err()
     fn exercise_status(&self, ui: &mut Ui) {
-        if let Some(status) = &self.add_exercise.status {
-            match status {
-                Ok(_) => {
-                    ui.label(RichText::new("Exercise saved!").color(Color32::from_rgb(184, 187, 38)));
-                }
-                Err(e) => {
-                    ui.label(RichText::new(e).color(Color32::from_rgb(204, 36, 29)));
-                }
-            };
-        }
+        let Some(status) = &self.add_exercise.status else { return };
+        let (text, color) = match status {
+            Ok(_) => ("Exercise saved!", self.theme.green),
+            Err(e) => (e.as_str(), self.theme.red),
+        };
+        ui.label(RichText::new(text).color(color));
     }
 
-    fn exercise_list(&self, ui: &mut Ui, list_width: f32, height: f32, margin: f32, inner_margin: i8) {
+    /// lists all currently available exercises
+    fn exercise_list(&self, ui: &mut Ui, list_width: f32, available_height: f32, inner_margin: i8) -> Option<Uuid> {
+        let margin = self.sizes.margin / 3.0;
+        let mut to_delete = None;
         ui.vertical(|ui| {
             ui.set_width(list_width);
+            ui.set_min_height(available_height);
             egui::ScrollArea::vertical()
-                .auto_shrink([false, false])
                 .max_width(list_width - margin)
-                .min_scrolled_height(height)
+                .max_height(available_height)
                 .show(ui, |ui| {
                     for exercise in &self.exercises {
-                        self.exercise_card(ui, exercise, list_width, height, margin, inner_margin);
-                        ui.add_space(height * 0.01);
+                        if self.exercise_card(ui, exercise, list_width, margin, inner_margin) {
+                            to_delete = Some(exercise.id);
+                        }
+                        ui.add_space(margin * 0.5);
                     }
+                    ui.add_space(margin);
                 });
         });
+        to_delete
     }
 
-    fn exercise_card(&self, ui: &mut Ui, exercise: &Exercise, list_width: f32, height: f32, margin: f32, inner_margin: i8) {
+    /// Generates a field containing the title, description and a delete button for one exercise
+    fn exercise_card(&self, ui: &mut Ui, exercise: &Exercise, list_width: f32, margin: f32, inner_margin: i8) -> bool {
+        let mut deleted = false;
         egui::Frame::NONE
-            .fill(Color32::from_rgb(60, 56, 54))
-            .corner_radius(8.0)
+            .fill(self.theme.text_field)
+            .corner_radius(self.sizes.corner_radius)
             .inner_margin(egui::Margin::same(inner_margin))
             .show(ui, |ui| {
                 ui.set_width(list_width - margin * 2.0);
-                ui.label(
-                    RichText::new(&exercise.name)
-                        .color(self.theme.title)
-                        .strong()
-                        .size(height * 0.025),
-                );
+                ui.horizontal(|ui| {
+                    ui.label(
+                        RichText::new(&exercise.name)
+                            .color(self.theme.title)
+                            .strong()
+                            .size(20.0),
+                    );
+                    if self.delete_button(ui) {
+                        deleted = true
+                    }
+                });
                 ui.separator();
                 ui.add(
                     egui::Label::new(
                         RichText::new(&exercise.instructions)
                             .color(self.theme.fg)
-                            .weak(),
+                            .weak()
+                            .size(16.0),
                     )
                     .wrap(),
                 );
             });
+        deleted
+    }
+
+    /// Creates a small red round delete button with a X
+    fn delete_button(&self, ui: &mut Ui) -> bool {
+        let mut clicked = false;
+        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+            if ui
+                .add(
+                    Button::new(
+                        RichText::new("X")
+                            .color(self.theme.white)
+                            .size(12.0),
+                    )
+                    .fill(self.theme.red)
+                    .corner_radius(self.sizes.corner_radius),
+                )
+                .clicked()
+            {
+                clicked = true;
+            }
+        });
+        clicked
     }
 }

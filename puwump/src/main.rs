@@ -1,10 +1,10 @@
 pub mod db;
 pub mod errors;
 pub mod models;
-// mod ui;
+mod ui;
 pub mod util;
 
-use crate::{db::Db, errors::Result};
+use crate::{db::Db, errors::Result, ui::core::PuwumpUi};
 
 #[rustfmt::skip]
 static EXAMPLE_VALUES: [(&str, &str); 20] = [
@@ -40,21 +40,10 @@ fn generate_examples(db: &Db) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let db = Db::init()?.reset()?;
-
-    db.insert_ingredient("fuß")?;
-    db.insert_ingredient("wasser")?;
-    db.insert_meal("fußsuppe", "leeecker, leicht käsig", 161)?;
-    db.insert_meal_ingredient("fußsuppe", "fuß", 2)?;
-    db.insert_meal_ingredient("fußsuppe", "wasser", 100)?;
-    let ingrs = db.get_meal_ingredients("fußsuppe")?;
-    for ing in ingrs {
-        println!("{:#?}", ing);
-    }
-    // let options = eframe::NativeOptions {
-    //     viewport: egui::ViewportBuilder::default(),
-    //     ..Default::default()
-    // };
-    // eframe::run_native("puwump", options, Box::new(|cc| Ok(Box::new(PuwumpUi::new(cc)?))))?;
+    let options = eframe::NativeOptions {
+        viewport: egui::ViewportBuilder::default(),
+        ..Default::default()
+    };
+    eframe::run_native("puwump", options, Box::new(|cc| Ok(Box::new(PuwumpUi::new(cc)?))))?;
     Ok(())
 }

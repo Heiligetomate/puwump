@@ -8,6 +8,7 @@ pub struct Theme {
     pub blue: Color32,
     pub text_field: Color32,
     pub header_bg: Color32,
+    pub white: Color32,
 }
 
 impl Default for Theme {
@@ -19,6 +20,7 @@ impl Default for Theme {
         let _bg = Color32::from_rgb(40, 40, 40);
         let fg = Color32::from_rgb(235, 219, 178);
         let title = Color32::from_rgb(250, 189, 47);
+        let white = Color32::WHITE;
         let header_bg = Color32::from_rgb(50, 48, 47);
         Self {
             fg,
@@ -27,6 +29,7 @@ impl Default for Theme {
             green,
             red,
             text_field,
+            white,
             header_bg,
         }
     }
