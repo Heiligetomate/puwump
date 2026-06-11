@@ -11,12 +11,8 @@ pub trait Model: Debug {
 }
 
 pub fn statement_to_model<M: Model>(mut stmt: Statement, params: impl Params) -> Result<M> {
-    let plan = stmt
-        .query_map(params, M::from_row)?
-        .collect::<rusqlite::Result<Vec<M>>>()
-        .map_err(|_| PuwumpError::RowNotFound)?
-        .into_iter()
+    stmt.query_map(params, M::from_row)?
         .next()
-        .ok_or(PuwumpError::RowNotFound)?;
-    Ok(plan)
+        .ok_or(PuwumpError::RowNotFound)?
+        .map_err(|_| PuwumpError::RowNotFound)
 }
