@@ -29,17 +29,17 @@ CREATE TABLE IF NOT EXISTS completed_workout (
     FOREIGN KEY (plan_id) REFERENCES plan(id)
 );
 
-CREATE TABLE IF NOT EXISTS mahlzeit (
+CREATE TABLE IF NOT EXISTS meal (
     name        TEXT PRIMARY KEY,
     kalorien    INTEGER NOT NULL,
     description TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS zutat (
+CREATE TABLE IF NOT EXISTS ingredient (
     name    TEXT PRIMARY KEY
 );
 
-create TABLE IF NOT EXISTS zutat_in_mahlzeit (
+create TABLE IF NOT EXISTS ingredient_in_meal (
     anzahl        INTEGER NOT NULL,
     mahlzeit_name TEXT NOT NULL,
     zutat_name    TEXT NOT NULL,
@@ -48,7 +48,7 @@ create TABLE IF NOT EXISTS zutat_in_mahlzeit (
     FOREIGN KEY   (zutat_name)    REFERENCES zutat(name)
 );
 
-create TABLE IF NOT EXISTS mahlzeit_gemampft (
+create TABLE IF NOT EXISTS meal_gemampft (
     date  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     mahlzeit_name  TEXT NOT NULL, 
     FOREIGN KEY (mahlzeit_name) REFERENCES mahlzeit(name)
