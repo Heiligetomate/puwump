@@ -12,7 +12,9 @@ use crate::{
 };
 
 impl Db {
-    pub fn new_plan(&self, name: &str, description: &str, est_min: u16) -> Result<Uuid> {
+    /// Inserts a new plan
+    /// Plan names are not unique
+    pub fn insert_plan(&self, name: &str, description: &str, est_min: u16) -> Result<Uuid> {
         let id = Uuid::new_v4();
         self.con.execute(
             "INSERT INTO plan (id, name, description, est_mins)  VALUES (?1, ?2, ?3, ?4)",
@@ -22,20 +24,14 @@ impl Db {
         Ok(id)
     }
 
-    pub fn get_all_plans(&self) -> Result<Vec<Uuid>> {
-        let stmt = self
-            .con
-            .prepare("SELECT id FROM plan")?;
-        let ids = ids_from_statement(stmt)?;
-        Ok(ids)
-    }
-
+    /// Removes a plan with the given Uuid
     pub fn remove_plan(&self, uuid: Uuid) -> Result<()> {
         self.con
             .execute("DELETE FROM plan WHERE id = ?1", params![uuid.to_string()])?;
         Ok(())
     }
 
+    /// Get a plan with its id
     pub fn get_plan(&self, uuid: Uuid) -> Result<Plan> {
         let stmt = self
             .con
@@ -45,6 +41,26 @@ impl Db {
         Ok(plan)
     }
 
+    /// Insert a new exercise into a plan
+    pub fn insert_plan_exercise(&self, plan_id: Uuid, exercise_id: Uuid, reps: u16, order_index: u16) -> Result<()> {
+        self.con.execute(
+            "INSERT INTO plan_exercise (plan_id, exercise_id, reps, order_index) VALUES (?1, ?2, ?3, ?4)",
+            params![plan_id.to_string(), exercise_id.to_string(), reps, order_index],
+        )?;
+        Ok(())
+    }
+
+    /// Get all Plan Uuids
+    pub fn get_all_plans(&self) -> Result<Vec<Uuid>> {
+        let stmt = self
+            .con
+            .prepare("SELECT id FROM plan")?;
+        let ids = ids_from_statement(stmt)?;
+        Ok(ids)
+    }
+
+    // Get all Exercises of a plan with the given uuid
+    // Returns the a Vec of PlanExerciseDetail containing the Plan and some extra values
     pub fn get_plan_exercises(&self, uuid: Uuid) -> Result<Vec<PlanExerciseDetail>> {
         let mut stmt = self.con.prepare(
             "SELECT e.id, e.name, e.instructions, pe.order_index, pe.reps

@@ -33,7 +33,7 @@ static EXAMPLE_VALUES: [(&str, &str); 20] = [
 #[allow(unused)]
 fn generate_examples(db: &Db) -> Result<()> {
     for (name, instr) in EXAMPLE_VALUES {
-        db.new_exercise(name, instr)?;
+        db.insert_exercise(name, instr)?;
     }
 
     Ok(())
@@ -41,10 +41,9 @@ fn generate_examples(db: &Db) -> Result<()> {
 
 fn main() -> Result<()> {
     let db = Db::init()?.create()?;
-    // db.insert_ingredient("fuß")?;
-    // db.insert_meal("fußsuppe", "leicht käsig", 2)?;
-    db.insert_meal_ingredient("fußsuppe", "fuß", 3)?;
-    // generate_examples(&db)?;
+
+    db.insert_exercise("meowing", "meow around")?;
+
     // let options = eframe::NativeOptions {
     //     viewport: egui::ViewportBuilder::default(),
     //     ..Default::default()

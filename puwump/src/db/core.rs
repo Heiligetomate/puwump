@@ -1,7 +1,6 @@
 use std::{fs::remove_file, path::PathBuf};
 
-use rusqlite::{Connection, params};
-use uuid::Uuid;
+use rusqlite::Connection;
 
 use crate::{
     errors::{PuwumpError, Result},
@@ -42,14 +41,6 @@ impl Db {
         self.delete()?;
         let db = Self::init()?;
         db.create()
-    }
-
-    pub fn insert_exercise(&self, plan_id: Uuid, exercise_id: Uuid, reps: u16, order_index: u16) -> Result<()> {
-        self.con.execute(
-            "INSERT INTO plan_exercise (plan_id, exercise_id, reps, order_index) VALUES (?1, ?2, ?3, ?4)",
-            params![plan_id.to_string(), exercise_id.to_string(), reps, order_index],
-        )?;
-        Ok(())
     }
 
     pub fn map_sqlite_err(e: rusqlite::Error) -> PuwumpError {
