@@ -47,6 +47,10 @@ fn main() -> Result<()> {
     db.insert_meal("fußsuppe", "leeecker, leicht käsig", 161)?;
     db.insert_meal_ingredient("fußsuppe", "fuß", 2)?;
     db.insert_meal_ingredient("fußsuppe", "wasser", 100)?;
+    let ingrs = db.get_meal_ingredients("fußsuppe")?;
+    for ing in ingrs {
+        println!("{:#?}", ing);
+    }
     // let options = eframe::NativeOptions {
     //     viewport: egui::ViewportBuilder::default(),
     //     ..Default::default()

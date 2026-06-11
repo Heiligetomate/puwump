@@ -1,7 +1,10 @@
 use crate::{
     db::Db,
     errors::{PuwumpError, Result},
-    models::{Ingredient, Meal, core::statement_to_model},
+    models::{
+        Ingredient, Meal, MealIngredientDetail,
+        core::{Model, statement_to_model},
+    },
 };
 
 impl Db {
@@ -49,10 +52,7 @@ impl Db {
     /// Amount is amount in grams
     pub fn insert_meal_ingredient(&self, meal_name: &str, ingredient_name: &str, amount: u32) -> Result<()> {
         self.con
-            .execute(
-                "INSERT INTO ingredient_in_meal (amount_gr, meal_name, ingredient_name) VALUES (?1, ?2, ?3)",
-                (amount, meal_name, ingredient_name),
-            )
+            .execute("INSERT INTO ingredient_in_meal (amount_gr, meal_name, ingredient_name) VALUES (?1, ?2, ?3)", (amount, meal_name, ingredient_name))
             .map_err(Self::map_sqlite_err)?;
         Ok(())
     }
@@ -78,5 +78,44 @@ impl Db {
             .con
             .prepare("SELECT * FROM meal WHERE name = ?1")?;
         statement_to_model(stmt, (name,))
+    }
+
+    /// Returns a Vec with all meal names
+    /// Ordered by name, case-insensitive
+    pub fn get_all_meal_names(&self) -> Result<Vec<String>> {
+        let mut stmt = self
+            .con
+            .prepare("SELECT name FROM meal ORDER BY name COLLATE NOCASE ASC")?;
+        let names = stmt
+            .query_map([], |row| row.get(0))?
+            .collect::<rusqlite::Result<Vec<String>>>()
+            .map_err(|_| PuwumpError::RowNotFound)?;
+        Ok(names)
+    }
+
+    /// Returns a Vec with all meals as Meal objects
+    /// Ordered by name, case-insensitive
+    pub fn get_all_meals(&self) -> Result<Vec<Meal>> {
+        let mut meals = Vec::new();
+        for name in self.get_all_meal_names()? {
+            meals.push(self.get_meal(&name)?);
+        }
+        Ok(meals)
+    }
+
+    /// Returns a Vec with all ingredients in a recipe  
+    /// Returns an object containing the ingredient and the amount in grams
+    pub fn get_meal_ingredients(&self, meal_name: &str) -> Result<Vec<MealIngredientDetail>> {
+        let mut stmt = self.con.prepare(
+            "SELECT i.name, im.amount_gr
+        FROM ingredient_in_meal im
+        JOIN ingredient i ON i.name = im.ingredient_name
+        WHERE im.meal_name = ?1",
+        )?;
+        let ingredients = stmt
+            .query_map((meal_name,), <MealIngredientDetail as Model>::from_row)?
+            .collect::<rusqlite::Result<Vec<MealIngredientDetail>>>()
+            .map_err(|_| PuwumpError::RowNotFound)?;
+        Ok(ingredients)
     }
 }
