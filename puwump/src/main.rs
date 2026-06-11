@@ -41,10 +41,12 @@ fn generate_examples(db: &Db) -> Result<()> {
 
 fn main() -> Result<()> {
     let db = Db::init()?.reset()?;
-    generate_examples(&db)?;
-    db.insert_exercise("meow", "Meow around")?;
-    let ex = db.get_all_exercises()?;
-    println!("{:#?}", ex);
+
+    db.insert_ingredient("fuß")?;
+    db.insert_ingredient("wasser")?;
+    db.insert_meal("fußsuppe", "leeecker, leicht käsig", 161)?;
+    db.insert_meal_ingredient("fußsuppe", "fuß", 2)?;
+    db.insert_meal_ingredient("fußsuppe", "wasser", 100)?;
     // let options = eframe::NativeOptions {
     //     viewport: egui::ViewportBuilder::default(),
     //     ..Default::default()
