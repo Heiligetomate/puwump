@@ -40,10 +40,11 @@ fn generate_examples(db: &Db) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let db = Db::init()?.create()?;
-
-    db.insert_exercise("meowing", "meow around")?;
-
+    let db = Db::init()?.reset()?;
+    generate_examples(&db)?;
+    db.insert_exercise("meow", "Meow around")?;
+    let ex = db.get_all_exercises()?;
+    println!("{:#?}", ex);
     // let options = eframe::NativeOptions {
     //     viewport: egui::ViewportBuilder::default(),
     //     ..Default::default()

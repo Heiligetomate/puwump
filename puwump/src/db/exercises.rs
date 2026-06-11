@@ -37,17 +37,19 @@ impl Db {
     }
 
     /// Returns a Vec with all exercise uuids
+    /// Ordered by name, case-insensitive
     pub fn get_all_exercise_ids(&self) -> Result<Vec<Uuid>> {
         let stmt = self
             .con
-            .prepare("SELECT id FROM exercise")?;
+            .prepare("SELECT id FROM exercise ORDER BY name COLLATE NOCASE ASC")?;
 
         let ids = ids_from_statement(stmt)?;
 
         Ok(ids)
     }
 
-    /// Returns a Vec with all exercises as Exercise object
+    /// Returns a Vec with all exercises as Exercise object  
+    /// Ordered by name, case-insensitive
     pub fn get_all_exercises(&self) -> Result<Vec<Exercise>> {
         let mut exercises = Vec::new();
         for id in self.get_all_exercise_ids()? {
