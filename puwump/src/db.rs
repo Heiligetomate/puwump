@@ -175,7 +175,10 @@ impl Db {
     fn map_sqlite_err(e: rusqlite::Error) -> PuwumpError {
         match e {
             rusqlite::Error::SqliteFailure(e, _) => match e.extended_code {
+                // https://www.sqlite.org/rescode.html#constraint_primarykey
+                // https://www.sqlite.org/rescode.html#constraint_unique
                 1555 | 2067 => PuwumpError::UniqueViolation,
+                // https://www.sqlite.org/rescode.html#constraint_foreignkey
                 787 => PuwumpError::ForeignKeyViolation,
                 _ => PuwumpError::Rusqlite(e.to_string()),
             },
