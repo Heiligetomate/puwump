@@ -49,7 +49,7 @@ impl Model for MealIngredientDetail {
                 name: row.get(0)?,
                 id: Uuid::parse_str(&id).map_err(|_| rusqlite::Error::InvalidQuery)?,
             },
-            amount_gr: row.get(1)?,
+            amount_gr: row.get(2)?,
         })
     }
 }

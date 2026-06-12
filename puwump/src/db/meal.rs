@@ -97,11 +97,11 @@ impl Db {
 
     /// Add an ingredient to a meal
     /// Amount is amount in grams
-    pub fn insert_meal_ingredient(&self, meal_name: &str, ingredient_name: &str, amount: u32) -> Result<()> {
+    pub fn insert_meal_ingredient(&self, meal_name: &str, ingredient_id: Uuid, amount: u32) -> Result<()> {
         self.con
             .execute(
-                "INSERT INTO ingredient_in_meal (amount_gr, meal_name, ingredient_name) VALUES (?1, ?2, ?3)",
-                (amount, meal_name, ingredient_name),
+                "INSERT INTO ingredient_in_meal (amount_gr, meal_name, ingredient_id) VALUES (?1, ?2, ?3)",
+                (amount, meal_name, ingredient_id.to_string()),
             )
             .map_err(Self::map_sqlite_err)?;
         Ok(())
@@ -157,9 +157,9 @@ impl Db {
     /// Returns an object containing the ingredient and the amount in grams
     pub fn get_meal_ingredients(&self, meal_name: &str) -> Result<Vec<MealIngredientDetail>> {
         let mut stmt = self.con.prepare(
-            "SELECT i.name, im.amount_gr
+            "SELECT i.name, i.id, im.amount_gr
         FROM ingredient_in_meal im
-        JOIN ingredient i ON i.name = im.ingredient_name
+        JOIN ingredient i ON i.id = im.ingredient_id
         WHERE im.meal_name = ?1",
         )?;
         let ingredients = stmt
