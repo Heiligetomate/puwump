@@ -22,7 +22,7 @@ impl Db {
         let con = Connection::open(&full)?;
         con.pragma_update(None, "foreign_keys", "on")?;
 
-        Ok(Self { path: full, con })
+        Self { path: full, con }.create()
     }
 
     pub fn create(self) -> Result<Self> {
