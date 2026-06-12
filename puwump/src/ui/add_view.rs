@@ -3,8 +3,8 @@ use uuid::Uuid;
 
 use crate::{
     errors::PuwumpError,
-    models::{CardAdd, core::Model},
-    ui::{core::PuwumpUi, task_handler::AddTaskHandler, util::text_field},
+    models::{AddTaskHandler, CardAdd, core::Model},
+    ui::{core::PuwumpUi, util::text_field},
 };
 
 impl PuwumpUi {

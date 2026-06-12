@@ -4,8 +4,8 @@ use egui::{Button, RichText, Ui};
 use crate::{
     db::Db,
     errors::Result,
-    models::{Exercise, Ingredient},
-    ui::{sizes::SizeSheet, task_handler::AddTaskHandler, theme::Theme},
+    models::{AddTaskHandler, Exercise, Ingredient},
+    ui::{sizes::SizeSheet, theme::Theme},
 };
 
 pub enum View {
