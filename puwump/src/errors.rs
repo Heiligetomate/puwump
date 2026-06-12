@@ -25,7 +25,7 @@ impl Display for PuwumpError {
             Self::DbRemoval => write!(f, "error while delting the db file"),
             Self::UuidParse => write!(f, "uuid parse error"),
             Self::RowNotFound => write!(f, "row not found"),
-            Self::UniqueViolation => write!(f, "Exercise already exists"),
+            Self::UniqueViolation => write!(f, "unique violation"),
             Self::ForeignKeyViolation => write!(f, "Foreign key doesnt exist"),
         }
     }
