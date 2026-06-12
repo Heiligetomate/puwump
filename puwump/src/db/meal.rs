@@ -31,6 +31,8 @@ impl Db {
         statement_to_model(stmt, (id.to_string(),))
     }
 
+    /// Removes the ingredient with the given id
+    /// Every Recipe entry gets deleted automatically
     pub fn remove_ingredient(&self, id: Uuid) -> Result<()> {
         self.con
             .execute("DELETE FROM ingredient WHERE id = ?1", (id.to_string(),))?;

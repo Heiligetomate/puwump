@@ -19,6 +19,7 @@ impl Db {
     }
 
     /// Removes an exercise with the given uuid
+    /// All Plan entries get deleted automatically
     pub fn remove_exercise(&self, uuid: Uuid) -> Result<()> {
         self.con
             .execute("DELETE FROM exercise WHERE id = ?1", params![uuid.to_string()])?;
