@@ -12,13 +12,13 @@ CREATE TABLE IF NOT EXISTS plan (
 );
 
 CREATE TABLE IF NOT EXISTS plan_exercise (
-    plan_id     INTEGER NOT NULL,
-    exercise_id INTEGER NOT NULL,
+    plan_id     TEXT NOT NULL,
+    exercise_id TEXT NOT NULL,
     order_index INTEGER NOT NULL,
     reps        INTEGER,
     PRIMARY KEY (plan_id, exercise_id),
-    FOREIGN KEY (plan_id)     REFERENCES plan(id),
-    FOREIGN KEY (exercise_id) REFERENCES exercise(id)
+    FOREIGN KEY (plan_id)     REFERENCES plan(id)     ON DELETE CASCADE,
+    FOREIGN KEY (exercise_id) REFERENCES exercise(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS completed_workout (
@@ -45,8 +45,8 @@ create TABLE IF NOT EXISTS ingredient_in_meal (
     meal_name       TEXT NOT NULL,
     ingredient_id   TEXT NOT NULL,
     PRIMARY KEY     (meal_name, ingredient_id),
-    FOREIGN KEY     (meal_name)       REFERENCES meal(name),
-    FOREIGN KEY     (ingredient_id) REFERENCES ingredient(id)
+    FOREIGN KEY     (meal_name)       REFERENCES meal(name)   ON DELETE CASCADE, 
+    FOREIGN KEY     (ingredient_id) REFERENCES ingredient(id) ON DELETE CASCADE
 );
 
 create TABLE IF NOT EXISTS meal_inhaled (
