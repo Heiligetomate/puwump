@@ -1,7 +1,7 @@
 use uuid::Uuid;
 
 use crate::{
-    db::Db,
+    db::{self, Db},
     errors::Result,
     models::{Exercise, Ingredient, core::Model},
 };
@@ -13,6 +13,7 @@ pub trait CardAdd: Model + Sized {
     fn get_all(db: &Db) -> Result<Vec<Self>>;
     fn insert(db: &Db, name: &str, body: Option<&str>) -> Result<()>;
     fn delete(db: &Db, id: Uuid) -> Result<()>;
+    fn name() -> &'static str;
 }
 
 impl CardAdd for Exercise {
@@ -42,6 +43,10 @@ impl CardAdd for Exercise {
 
     fn delete(db: &Db, id: Uuid) -> Result<()> {
         db.remove_exercise(id)
+    }
+
+    fn name() -> &'static str {
+        "exercise"
     }
 }
 
@@ -73,5 +78,9 @@ impl CardAdd for Ingredient {
 
     fn delete(db: &Db, id: Uuid) -> Result<()> {
         db.remove_ingredient(id)
+    }
+
+    fn name() -> &'static str {
+        "ingredient"
     }
 }

@@ -98,7 +98,7 @@ impl PuwumpUi {
     /// Handles the input when the confirm button for the exercises is pressed
     pub fn on_add_confirm<A: CardAdd + Model>(&mut self, task_handler: &mut AddTaskHandler<A>) {
         if task_handler.track_empty() {
-            task_handler.set_err("Fill out both fields");
+            task_handler.set_err("Fill out all fields");
             return;
         }
         match A::insert(&self.db, &task_handler.title_track, task_handler.body_track.as_deref()) {
@@ -108,7 +108,8 @@ impl PuwumpUi {
                 task_handler.data = A::get_all(&self.db).unwrap(); // TODO: handle
             }
             Err(PuwumpError::UniqueViolation) => {
-                task_handler.set_err("Exercise already exists");
+                let err = format!("{} already exists.", A::name());
+                task_handler.set_err(err.as_str());
             }
             Err(e) => panic!("db is broken {e}"),
         }
