@@ -5,7 +5,7 @@ use crate::{
     db::Db,
     errors::Result,
     models::{AddTaskHandler, Exercise, Ingredient},
-    ui::{sizes::SizeSheet, theme::Theme},
+    ui::{manage_view::PlanHandler, sizes::SizeSheet, theme::Theme},
 };
 
 pub enum View {
@@ -22,6 +22,7 @@ pub struct PuwumpUi {
     pub sizes: SizeSheet,
     pub exercise_hndl: AddTaskHandler<Exercise>,
     pub ingredient_hdnl: AddTaskHandler<Ingredient>,
+    pub plan_hndl: PlanHandler,
     pub db: Db,
 }
 
@@ -33,6 +34,7 @@ impl PuwumpUi {
             sizes: SizeSheet::new(cc),
             exercise_hndl: AddTaskHandler::default(),
             ingredient_hdnl: AddTaskHandler::default(),
+            plan_hndl: PlanHandler::default(),
             db: Db::init()?,
         })
     }
@@ -56,7 +58,7 @@ impl eframe::App for PuwumpUi {
         ui.scope_builder(egui::UiBuilder::new().max_rect(content_rect), |ui| match self.view {
             View::Default => self.home_view(ui),
             View::AddExercise => self.add_exercise_view(ui),
-            View::AddPlan => self.add_plan_view(ui),
+            View::AddPlan => self.manage_view(ui),
             View::Workout => self.work_out_view(ui),
             View::AddIngredient => self.add_ingredient_view(ui),
         });
