@@ -53,12 +53,22 @@ impl Db {
     }
 
     /// Get all Plan Uuids
-    pub fn get_all_plans(&self) -> Result<Vec<Uuid>> {
+    pub fn get_all_plan_ids(&self) -> Result<Vec<Uuid>> {
         let stmt = self
             .con
             .prepare("SELECT id FROM plan")?;
         let ids = ids_from_statement(stmt)?;
         Ok(ids)
+    }
+
+    /// Get all plans as a vec of Plan objects
+    pub fn get_all_plans(&self) -> Result<Vec<Plan>> {
+        let mut stmt = self.con.prepare("SELECT * FROM plan")?;
+        let exercises = stmt
+            .query_map(params![], <Plan as Model>::from_row)?
+            .collect::<rusqlite::Result<Vec<Plan>>>()
+            .map_err(|_| PuwumpError::RowNotFound)?;
+        Ok(exercises)
     }
 
     // Get all Exercises of a plan with the given uuid
@@ -76,5 +86,11 @@ impl Db {
             .collect::<rusqlite::Result<Vec<PlanExerciseDetail>>>()
             .map_err(|_| PuwumpError::RowNotFound)?;
         Ok(exercises)
+    }
+
+    pub fn remove_plan_exercise(&self, plan_id: Uuid, exercise_id: Uuid) -> Result<()> {
+        self.con
+            .execute("DELETE FROM plan_exercise WHERE plan_id = ?1 AND exercise_id = ?2", (plan_id.to_string(), exercise_id.to_string()))?;
+        Ok(())
     }
 }
