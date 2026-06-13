@@ -80,32 +80,100 @@ impl PlanHandler {
 
 impl PuwumpUi {
     pub fn manage_view(&mut self, ui: &mut Ui) {
-        ui.horizontal(|ui| {
-            let width = ui.available_width();
-            let height = ui.available_height();
-            let half_width = width / 2.0 - self.sizes.margin * 2.0;
+        let width = self.sizes.width;
+        let height = self.sizes.height;
+        let margin = self.sizes.margin;
 
-            ui.add_space(self.sizes.margin);
+        let inner_margin = (width * 0.01) as i8;
+        let left_width = width * 0.4;
+        let list_width = width * 0.55 - margin * 2.0;
+
+        ui.add_space(height * 0.05);
+
+        let available_height = ui.available_height();
+
+        ui.horizontal(|ui| {
+            ui.add_space(margin);
+
             ui.vertical(|ui| {
-                ui.set_width(half_width);
-                if ui.button("update plans").clicked() {
+                ui.set_width(left_width);
+
+                if ui
+                    .add_sized([left_width, height * 0.07], egui::Button::new("Update Plans"))
+                    .clicked()
+                {
                     self.plan_hndl
                         .update_plans(&self.db)
                         .unwrap();
                 }
             });
-            ui.add_space(self.sizes.margin);
-            ui.separator();
-            ui.add_space(self.sizes.margin);
 
-            ui.vertical(|ui| {
-                ui.set_width(half_width);
-                if let Some(plans) = &self.plan_hndl.plans {
-                    for plan in plans {
-                        ui.label(RichText::new(plan.name.as_str()).size(12.0));
-                    }
-                }
-            });
+            ui.add_space(margin);
+            ui.separator();
+            ui.add_space(margin);
+
+            if let Some(id) = self.card_list(ui, list_width, available_height, inner_margin) {
+                self.plan_hndl
+                    .update(&self.db, Some(id))
+                    .unwrap();
+            }
         });
+    }
+
+    pub fn card_list(&self, ui: &mut Ui, list_width: f32, available_height: f32, inner_margin: i8) -> Option<Uuid> {
+        let margin = self.sizes.margin / 3.0;
+        let mut to_delete = None;
+        ui.vertical(|ui| {
+            ui.set_width(list_width);
+            ui.set_min_height(available_height);
+            egui::ScrollArea::vertical()
+                .max_width(list_width - margin)
+                .max_height(available_height)
+                .show(ui, |ui| {
+                    if let Some(plans) = &self.plan_hndl.plans {
+                        for plan in plans.iter() {
+                            if self.add_plan_card(ui, plan, list_width, margin, inner_margin) {
+                                to_delete = Some(plan.id);
+                            }
+                            ui.add_space(margin * 0.5);
+                        }
+                        ui.add_space(margin);
+                    }
+                });
+        });
+        to_delete
+    }
+
+    pub fn add_plan_card(&self, ui: &mut Ui, plan: &Plan, list_width: f32, margin: f32, inner_margin: i8) -> bool {
+        let mut deleted = false;
+        egui::Frame::NONE
+            .fill(self.theme.text_field)
+            .corner_radius(self.sizes.corner_radius)
+            .inner_margin(egui::Margin::same(inner_margin))
+            .show(ui, |ui| {
+                ui.set_width(list_width - margin * 2.0);
+                ui.horizontal(|ui| {
+                    ui.label(
+                        RichText::new(&plan.name)
+                            .color(self.theme.title)
+                            .strong()
+                            .size(20.0),
+                    );
+                    if self.delete_button(ui) {
+                        deleted = true
+                    }
+                });
+                ui.separator();
+                ui.add(
+                    egui::Label::new(
+                        RichText::new(&plan.description)
+                            .color(self.theme.fg)
+                            .weak()
+                            .size(16.0),
+                    )
+                    .wrap(),
+                );
+            });
+        deleted
     }
 }

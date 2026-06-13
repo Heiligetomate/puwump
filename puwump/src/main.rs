@@ -74,7 +74,9 @@ fn generate_plan_examples(db: &Db) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    generate_plan_examples(&Db::init()?.reset()?)?;
+    let db = &Db::init()?.reset()?;
+    generate_plan_examples(&db)?;
+    generate_exercise_examples(&db)?;
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()
