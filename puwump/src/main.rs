@@ -7,7 +7,7 @@ pub mod util;
 use crate::{db::Db, errors::Result, ui::core::PuwumpUi};
 
 #[rustfmt::skip]
-static EXAMPLE_VALUES: [(&str, &str); 20] = [
+static EXERCISE_EXAMPLE_VALUES: [(&str, &str); 20] = [
     ("Push-up", "Start in a plank position with hands shoulder-width apart. Lower your chest to the floor, then push back up."),
     ("Pull-up", "Hang from a bar with palms facing away. Pull yourself up until your chin is above the bar, then lower slowly."),
     ("Squat", "Stand with feet shoulder-width apart. Lower your hips until thighs are parallel to the floor, then stand back up."),
@@ -30,16 +30,51 @@ static EXAMPLE_VALUES: [(&str, &str); 20] = [
     ("Box Jump", "Stand in front of a box. Bend your knees and jump onto the box, land softly, then step back down."),
 ];
 
+#[rustfmt::skip]
+static PLAN_EXAMPLE_VALUES: [(&str, &str, u16); 20] = [ // Very sloppy values holy shit "Evening
+                                                        // Wind Down" lmao
+    ("Morning Stretch", "A gentle full-body stretching routine to improve mobility and wake up your muscles.", 15),
+    ("Quick Cardio Blast", "A short high-intensity cardio session featuring jumping jacks, burpees, and mountain climbers.", 20),
+    ("Upper Body Strength", "Focus on chest, shoulders, back, and arms using bodyweight or resistance training.", 45),
+    ("Lower Body Workout", "Train quads, hamstrings, glutes, and calves with squats, lunges, and related exercises.", 50),
+    ("Core Conditioning", "Strengthen your abs, obliques, and lower back with targeted core exercises.", 30),
+    ("Full Body Circuit", "A balanced workout combining strength and cardio exercises for the entire body.", 40),
+    ("Yoga Flow", "A relaxing sequence of yoga poses designed to improve flexibility and balance.", 35),
+    ("Mobility Session", "Joint mobility drills and dynamic stretches to enhance range of motion.", 25),
+    ("5K Run Training", "A structured running session focused on endurance and pacing for a 5K race.", 45),
+    ("Sprint Intervals", "Alternate between high-speed sprints and recovery periods to build speed and stamina.", 30),
+    ("Beginner Strength Plan", "An introductory strength workout suitable for those new to resistance training.", 40),
+    ("Advanced Push Day", "A challenging workout emphasizing chest, shoulders, and triceps.", 60),
+    ("Pull Day Routine", "Focus on back and biceps with pulling movements and accessory exercises.", 55),
+    ("Leg Day Challenge", "An intense lower-body workout targeting strength and muscular endurance.", 65),
+    ("Recovery Walk", "A light walking session to encourage active recovery and circulation.", 30),
+    ("Meditation Break", "Guided breathing and mindfulness exercises to reduce stress and improve focus.", 10),
+    ("Weekend Hike Prep", "Mobility, endurance, and strength work designed to prepare for a long hike.", 50),
+    ("Desk Worker Reset", "Exercises and stretches to counteract prolonged sitting and improve posture.", 20),
+    ("Evening Wind Down", "Gentle stretching and relaxation exercises to help you unwind before bed.", 15),
+    ("Athletic Performance", "A mixed training session focused on power, agility, coordination, and conditioning.", 70),
+];
+
 #[allow(unused)]
-fn generate_examples(db: &Db) -> Result<()> {
-    for (name, instr) in EXAMPLE_VALUES {
+fn generate_exercise_examples(db: &Db) -> Result<()> {
+    for (name, instr) in EXERCISE_EXAMPLE_VALUES {
         db.insert_exercise(name, instr)?;
     }
 
     Ok(())
 }
 
+#[allow(unused)]
+fn generate_plan_examples(db: &Db) -> Result<()> {
+    for (name, descr, est_min) in PLAN_EXAMPLE_VALUES {
+        db.insert_plan(name, descr, est_min)?;
+    }
+
+    Ok(())
+}
+
 fn main() -> Result<()> {
+    generate_plan_examples(&Db::init()?.reset()?)?;
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()
