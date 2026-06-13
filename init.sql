@@ -12,11 +12,11 @@ CREATE TABLE IF NOT EXISTS plan (
 );
 
 CREATE TABLE IF NOT EXISTS plan_exercise (
+    id          TEXT PRIMARY KEY,
     plan_id     TEXT NOT NULL,
     exercise_id TEXT NOT NULL,
     order_index INTEGER NOT NULL,
     reps        INTEGER,
-    PRIMARY KEY (plan_id, exercise_id),
     FOREIGN KEY (plan_id)     REFERENCES plan(id)     ON DELETE CASCADE,
     FOREIGN KEY (exercise_id) REFERENCES exercise(id) ON DELETE CASCADE
 );

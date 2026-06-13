@@ -9,6 +9,7 @@ use crate::{
     models::{
         Plan, PlanExerciseDetail,
         core::{Model, statement_to_model},
+        exercise,
     },
     util::ids_from_statement,
 };
@@ -44,10 +45,11 @@ impl Db {
     }
 
     /// Insert a new exercise into a plan
-    pub fn insert_plan_exercise(&self, plan_id: Uuid, exercise_id: Uuid, reps: u16, order_index: u16) -> Result<()> {
+    pub fn insert_plan_exercise(&self, plan_id: Uuid, exercise_id: Uuid, reps: u16) -> Result<()> {
         self.con.execute(
-            "INSERT INTO plan_exercise (plan_id, exercise_id, reps, order_index) VALUES (?1, ?2, ?3, ?4)",
-            params![plan_id.to_string(), exercise_id.to_string(), reps, order_index],
+            "INSERT INTO plan_exercise (id, plan_id, exercise_id, reps, order_index)
+         VALUES (?1, ?2, ?3, ?4, COALESCE((SELECT MAX(order_index) + 1 FROM plan_exercise WHERE plan_id = ?2), 0))",
+            params![Uuid::new_v4().to_string(), plan_id.to_string(), exercise_id.to_string(), reps],
         )?;
         Ok(())
     }
@@ -75,11 +77,11 @@ impl Db {
     // Returns the a Vec of PlanExerciseDetail containing the Plan and some extra values
     pub fn get_plan_exercises(&self, uuid: Uuid) -> Result<Vec<PlanExerciseDetail>> {
         let mut stmt = self.con.prepare(
-            "SELECT e.id, e.name, e.instructions, pe.order_index, pe.reps
-        FROM plan_exercise pe
-        JOIN exercise e ON e.id = pe.exercise_id
-        WHERE pe.plan_id = ?1
-        ORDER BY pe.order_index ASC",
+            "SELECT pe.id, e.id, e.name, e.instructions, pe.order_index, pe.reps
+                    FROM plan_exercise pe
+                    JOIN exercise e ON e.id = pe.exercise_id
+                    WHERE pe.plan_id = ?1
+                    ORDER BY pe.order_index ASC",
         )?;
         let exercises = stmt
             .query_map(params![uuid.to_string()], <PlanExerciseDetail as Model>::from_row)?
@@ -88,9 +90,33 @@ impl Db {
         Ok(exercises)
     }
 
-    pub fn remove_plan_exercise(&self, plan_id: Uuid, exercise_id: Uuid) -> Result<()> {
+    pub fn remove_plan_exercise(&self, id: Uuid) -> Result<()> {
         self.con
-            .execute("DELETE FROM plan_exercise WHERE plan_id = ?1 AND exercise_id = ?2", (plan_id.to_string(), exercise_id.to_string()))?;
+            .execute("DELETE FROM plan_exercise WHERE id = ?1", (id.to_string(),))?;
+        Ok(())
+    }
+
+    pub fn move_plan_exercise(&self, id: Uuid, diff: i8) -> Result<()> {
+        let (plan_id, current): (String, i16) = self
+            .con
+            .query_row("SELECT plan_id, order_index FROM plan_exercise WHERE id = ?1", params![id.to_string()], |row| {
+                Ok((row.get(0)?, row.get(1)?))
+            })?;
+
+        let target = current + diff as i16;
+
+        // Park our row at -1
+        self.con
+            .execute("UPDATE plan_exercise SET order_index = -1 WHERE id = ?1", params![id.to_string()])?;
+
+        // Move neighbour to old slot
+        self.con
+            .execute("UPDATE plan_exercise SET order_index = ?3 WHERE plan_id = ?1 AND order_index = ?2", params![plan_id, target, current])?;
+
+        // Move row to the target slot
+        self.con
+            .execute("UPDATE plan_exercise SET order_index = ?2 WHERE id = ?1", params![id.to_string(), target])?;
+
         Ok(())
     }
 }
