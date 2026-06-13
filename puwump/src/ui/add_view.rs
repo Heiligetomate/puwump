@@ -8,6 +8,7 @@ use crate::{
 };
 
 impl PuwumpUi {
+    /// Generates the full view
     pub fn add_view<A: Model + CardAdd>(&mut self, ui: &mut Ui, task_handler: &mut AddTaskHandler<A>) {
         let width = self.sizes.width;
         let height = self.sizes.height;
@@ -37,6 +38,7 @@ impl PuwumpUi {
         });
     }
 
+    /// Generates a full scrollable list for all add tasks, returns an id if a task got deleted
     pub fn add_list<A: CardAdd + Model>(&self, ui: &mut Ui, list_width: f32, available_height: f32, inner_margin: i8, task_handler: &AddTaskHandler<A>) -> Option<Uuid> {
         let margin = self.sizes.margin / 3.0;
         let mut to_delete = None;
@@ -48,7 +50,7 @@ impl PuwumpUi {
                 .max_height(available_height)
                 .show(ui, |ui| {
                     for elem in task_handler.data.iter() {
-                        if self.exercise_card(ui, elem, list_width, margin, inner_margin) {
+                        if self.add_card(ui, elem, list_width, margin, inner_margin) {
                             to_delete = Some(elem.key());
                         }
                         ui.add_space(margin * 0.5);
@@ -59,8 +61,8 @@ impl PuwumpUi {
         to_delete
     }
 
-    /// Generates a field containing the title, description and a delete button for one exercise
-    pub fn exercise_card<A: CardAdd>(&self, ui: &mut Ui, card: &A, list_width: f32, margin: f32, inner_margin: i8) -> bool {
+    /// Generates a field containing the title, description and a delete button for one task
+    pub fn add_card<A: CardAdd>(&self, ui: &mut Ui, card: &A, list_width: f32, margin: f32, inner_margin: i8) -> bool {
         let mut deleted = false;
         egui::Frame::NONE
             .fill(self.theme.text_field)
@@ -95,7 +97,7 @@ impl PuwumpUi {
         deleted
     }
 
-    /// Handles the input when the confirm button for the exercises is pressed
+    /// Handles the input when the confirm button for the add task is pressed
     pub fn on_add_confirm<A: CardAdd + Model>(&mut self, task_handler: &mut AddTaskHandler<A>) {
         if task_handler.track_empty() {
             task_handler.set_err("Fill out all fields");
@@ -115,10 +117,10 @@ impl PuwumpUi {
         }
     }
 
-    /// Does not do anything (returns) if the exercise status is None
-    /// Adds a green text "Exercise saved!" if the stuats is Ok()
+    /// Does not do anything (returns) if the add task status is None
+    /// Adds a green text "Successfully saved!" if the stuats is Ok()
     /// Adds a red text with the error message if the status is Err()
-    pub fn exercise_status<A: CardAdd>(&self, ui: &mut Ui, task_handler: &AddTaskHandler<A>) {
+    pub fn add_status<A: CardAdd>(&self, ui: &mut Ui, task_handler: &AddTaskHandler<A>) {
         let Some(status) = &task_handler.status else {
             return;
         };
@@ -131,7 +133,7 @@ impl PuwumpUi {
         ui.label(RichText::new(text).color(color));
     }
 
-    /// Full add-exercise form
+    /// Full add form
     fn add_form<A: CardAdd + Model>(&mut self, ui: &mut Ui, form_width: f32, height: f32, task_handler: &mut AddTaskHandler<A>) {
         ui.vertical(|ui| {
             ui.set_width(form_width);
@@ -140,7 +142,7 @@ impl PuwumpUi {
             if self.button(ui, form_width, height * 0.07, self.theme.green, "Confirm") {
                 self.on_add_confirm(task_handler);
             }
-            self.exercise_status(ui, task_handler);
+            self.add_status(ui, task_handler);
         });
     }
 
