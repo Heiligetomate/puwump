@@ -4,6 +4,7 @@ pub type Result<T> = std::result::Result<T, PuwumpError>;
 
 #[derive(Debug, Clone)]
 pub enum PuwumpError {
+    PlanNotFound,
     HomeNotFound,
     Ui(String),
     Rusqlite(String),
@@ -18,6 +19,7 @@ pub enum PuwumpError {
 impl Display for PuwumpError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::PlanNotFound => write!(f, "plan was not found"),
             Self::Ui(e) => write!(f, "Ui error: {e}"),
             Self::Rusqlite(e) => write!(f, "rusqlite error: {e}"),
             Self::HomeNotFound => write!(f, "Home env not found"),

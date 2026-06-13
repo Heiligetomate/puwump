@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::models::core::Model;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Plan {
     pub id: Uuid,
     pub name: String,
