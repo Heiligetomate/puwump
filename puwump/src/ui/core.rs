@@ -56,6 +56,7 @@ impl eframe::App for PuwumpUi {
         ui.scope_builder(egui::UiBuilder::new().max_rect(header_rect), |ui| {
             self.header(ui, full_width, full_height);
         });
+
         ui.scope_builder(egui::UiBuilder::new().max_rect(content_rect), |ui| match self.view {
             View::Default => self.home_view(ui),
             View::AddExercise => self.add_exercise_view(ui),
@@ -100,5 +101,17 @@ impl PuwumpUi {
         {
             self.view = View::Default;
         }
+    }
+
+    pub fn add_ingredient_view(&mut self, ui: &mut Ui) {
+        let mut handler = std::mem::take(&mut self.ingredient_hdnl);
+        self.add_view(ui, &mut handler);
+        self.ingredient_hdnl = handler;
+    }
+
+    pub fn add_exercise_view(&mut self, ui: &mut Ui) {
+        let mut handler = std::mem::take(&mut self.exercise_hndl);
+        self.add_view(ui, &mut handler);
+        self.exercise_hndl = handler;
     }
 }
