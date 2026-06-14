@@ -3,13 +3,13 @@ use uuid::Uuid;
 
 use crate::{
     errors::PuwumpError,
-    models::{AddTaskHandler, CardAdd, core::Model},
-    ui::{core::PuwumpUi, util::text_field},
+    models::{AddTaskHandler, CardAdd, card_compatible::CardCrud, core::Model},
+    ui::{core::PuwumpUi, theme::ButtonTheme, util::text_field},
 };
 
 impl PuwumpUi {
     /// Generates the full view
-    pub fn add_view<A: Model + CardAdd>(&mut self, ui: &mut Ui, task_handler: &mut AddTaskHandler<A>) {
+    pub fn add_view<A: CardCrud>(&mut self, ui: &mut Ui, task_handler: &mut AddTaskHandler<A>) {
         let width = self.sizes.width;
         let height = self.sizes.height;
         let margin = self.sizes.margin;
@@ -31,17 +31,21 @@ impl PuwumpUi {
             ui.add_space(margin);
             ui.separator();
             ui.add_space(margin);
-            if let Some(id) = self.add_list(ui, list_width, available_height, inner_margin, task_handler) {
-                A::delete(&self.db, id).unwrap();
-                task_handler.data = A::get_all(&self.db).unwrap_or_default();
+            for (id, clicked) in self.add_list(ui, list_width, available_height, inner_margin, &task_handler.data, &[ButtonTheme::delete()]) {
+                if clicked[0] {
+                    A::delete(&self.db, id).unwrap();
+                    task_handler.data = A::get_all(&self.db).unwrap_or_default();
+                }
             }
         });
     }
 
-    /// Generates a full scrollable list for all add tasks, returns an id if a task got deleted
-    pub fn add_list<A: CardAdd + Model>(&self, ui: &mut Ui, list_width: f32, available_height: f32, inner_margin: i8, task_handler: &AddTaskHandler<A>) -> Option<Uuid> {
+    /// Generates a full scrollable list for all add tasks
+    /// Generates a delete button for each card if delete is set to true
+    /// Returns an id if a task got deleted
+    pub fn add_list<A: CardAdd + Model>(&self, ui: &mut Ui, list_width: f32, available_height: f32, inner_margin: i8, data: &Vec<A>, buttons: &[ButtonTheme]) -> Vec<(Uuid, Vec<bool>)> {
         let margin = self.sizes.margin / 3.0;
-        let mut to_delete = None;
+        let mut results = Vec::new();
         ui.vertical(|ui| {
             ui.set_width(list_width);
             ui.set_min_height(available_height);
@@ -49,21 +53,21 @@ impl PuwumpUi {
                 .max_width(list_width - margin)
                 .max_height(available_height)
                 .show(ui, |ui| {
-                    for elem in task_handler.data.iter() {
-                        if self.add_card(ui, elem, list_width, margin, inner_margin) {
-                            to_delete = Some(elem.key());
-                        }
+                    for elem in data {
+                        let clicked = self.add_card(ui, elem, list_width, margin, inner_margin, buttons);
+                        results.push((elem.key(), clicked));
                         ui.add_space(margin * 0.5);
                     }
                     ui.add_space(margin);
                 });
         });
-        to_delete
+        results
     }
 
-    /// Generates a field containing the title, description and a delete button for one task
-    pub fn add_card<A: CardAdd>(&self, ui: &mut Ui, card: &A, list_width: f32, margin: f32, inner_margin: i8) -> bool {
-        let mut deleted = false;
+    /// Generates a field containing the title and the body if existent
+    /// Adds a delete button if delete is set to true
+    pub fn add_card<A: CardAdd>(&self, ui: &mut Ui, card: &A, list_width: f32, margin: f32, inner_margin: i8, buttons: &[ButtonTheme]) -> Vec<bool> {
+        let mut clicked = vec![false; buttons.len()];
         egui::Frame::NONE
             .fill(self.theme.text_field)
             .corner_radius(self.sizes.corner_radius)
@@ -77,9 +81,13 @@ impl PuwumpUi {
                             .strong()
                             .size(20.0),
                     );
-                    if self.delete_button(ui) {
-                        deleted = true
-                    }
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        for (i, theme) in buttons.iter().enumerate().rev() {
+                            if self.card_button_labeled(ui, *theme) {
+                                clicked[i] = true;
+                            }
+                        }
+                    });
                 });
                 if let Some(body) = card.body() {
                     ui.separator();
@@ -94,11 +102,11 @@ impl PuwumpUi {
                     );
                 }
             });
-        deleted
+        clicked
     }
 
     /// Handles the input when the confirm button for the add task is pressed
-    pub fn on_add_confirm<A: CardAdd + Model>(&mut self, task_handler: &mut AddTaskHandler<A>) {
+    pub fn on_add_confirm<A: CardCrud>(&mut self, task_handler: &mut AddTaskHandler<A>) {
         if task_handler.track_empty() {
             task_handler.set_err("Fill out all fields");
             return;
@@ -120,7 +128,7 @@ impl PuwumpUi {
     /// Does not do anything (returns) if the add task status is None
     /// Adds a green text "Successfully saved!" if the stuats is Ok()
     /// Adds a red text with the error message if the status is Err()
-    pub fn add_status<A: CardAdd>(&self, ui: &mut Ui, task_handler: &AddTaskHandler<A>) {
+    pub fn add_status<A: CardCrud>(&self, ui: &mut Ui, task_handler: &AddTaskHandler<A>) {
         let Some(status) = &task_handler.status else {
             return;
         };
@@ -134,7 +142,7 @@ impl PuwumpUi {
     }
 
     /// Full add form
-    fn add_form<A: CardAdd + Model>(&mut self, ui: &mut Ui, form_width: f32, height: f32, task_handler: &mut AddTaskHandler<A>) {
+    fn add_form<A: CardCrud>(&mut self, ui: &mut Ui, form_width: f32, height: f32, task_handler: &mut AddTaskHandler<A>) {
         ui.vertical(|ui| {
             ui.set_width(form_width);
             self.add_form_fields(ui, form_width, task_handler);
@@ -147,7 +155,7 @@ impl PuwumpUi {
     }
 
     /// Creates the fields needed to create a new eercise  
-    fn add_form_fields<A: CardAdd + Model>(&mut self, ui: &mut Ui, height: f32, task_handler: &mut AddTaskHandler<A>) {
+    fn add_form_fields<A: CardAdd>(&mut self, ui: &mut Ui, height: f32, task_handler: &mut AddTaskHandler<A>) {
         text_field(ui, &self.theme, &self.sizes, |ui| {
             ui.add(
                 TextEdit::singleline(&mut task_handler.title_track)

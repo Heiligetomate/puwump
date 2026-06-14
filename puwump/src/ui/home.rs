@@ -29,6 +29,10 @@ impl PuwumpUi {
 
             ui.add_space(spc);
             if self.button_full_width(ui, button_height, self.theme.green, "Add Plan") {
+                self.exercise_hndl.data = self
+                    .db
+                    .get_all_exercises()
+                    .unwrap_or_default();
                 self.view = View::AddPlan;
             }
 

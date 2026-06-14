@@ -1,9 +1,9 @@
-use egui::{Align, Button, Color32, Layout, RichText, Ui};
+use egui::{Button, Color32, RichText, Ui};
 
 use crate::ui::{
     core::{PuwumpUi, View},
     sizes::SizeSheet,
-    theme::Theme,
+    theme::{ButtonTheme, Theme},
 };
 
 impl PuwumpUi {
@@ -59,26 +59,18 @@ impl PuwumpUi {
         self.sizes.spc_mlt * ui.available_height()
     }
 
-    /// Creates a small red round delete button with a X
-    pub fn delete_button(&self, ui: &mut Ui) -> bool {
-        let mut clicked = false;
-        ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-            if ui
-                .add(
-                    Button::new(
-                        RichText::new("X")
-                            .color(self.theme.white)
-                            .size(12.0),
-                    )
-                    .fill(self.theme.red)
-                    .corner_radius(self.sizes.corner_radius),
-                )
-                .clicked()
-            {
-                clicked = true;
-            }
-        });
-        clicked
+    /// Creates a small button using a button theme, returns true if clicked
+    pub fn card_button_labeled(&self, ui: &mut Ui, theme: ButtonTheme) -> bool {
+        ui.add(
+            Button::new(
+                RichText::new(theme.symbol)
+                    .color(self.theme.white)
+                    .size(12.0),
+            )
+            .fill(theme.color)
+            .corner_radius(self.sizes.corner_radius),
+        )
+        .clicked()
     }
 }
 

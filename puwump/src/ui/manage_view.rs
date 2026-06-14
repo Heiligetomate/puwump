@@ -1,11 +1,10 @@
 use egui::{RichText, Ui};
-use uuid::Uuid;
 
 use crate::{
     db::Db,
-    errors::{PuwumpError, Result},
+    errors::Result,
     models::{Plan, PlanExerciseDetail},
-    ui::core::PuwumpUi,
+    ui::{core::PuwumpUi, theme::ButtonTheme},
 };
 
 pub struct PlanHandler {
@@ -25,20 +24,6 @@ impl Default for PlanHandler {
 }
 
 impl PlanHandler {
-    fn search(&self, query: &str) -> Option<Vec<&str>> {
-        let mut results = Vec::new();
-        if self.plan_ex.is_none() {
-            return None;
-        }
-        for ex in self.plan_ex.as_ref().unwrap().iter() {
-            let ex_name = ex.exercise.name.as_str();
-            if ex_name.contains(query) {
-                results.push(ex_name);
-            }
-        }
-        return Some(results);
-    }
-
     fn update_plans(&mut self, db: &Db) -> Result<()> {
         let plans = db.get_all_plans()?;
         self.plans = Some(plans);
@@ -46,33 +31,18 @@ impl PlanHandler {
         Ok(())
     }
 
-    fn update_exercises(&mut self, db: &Db, id: Option<Uuid>) -> Result<()> {
-        if id.is_some() {
-            let exercises = db.get_plan_exercises(id.unwrap())?;
+    fn update_exercises(&mut self, db: &Db) -> Result<()> {
+        if let Some(plan) = &self.selected {
+            let exercises = db.get_plan_exercises(plan.id)?;
             self.plan_ex = Some(exercises);
         }
 
         Ok(())
     }
 
-    fn update_selected(&mut self, id: Uuid) -> Result<()> {
-        if self.plans.is_none() {
-            return Err(PuwumpError::PlanNotFound);
-        }
-
-        for plan in self.plans.as_ref().unwrap() {
-            if plan.id == id {
-                self.selected = Some(plan.clone());
-                return Ok(());
-            }
-        }
-
-        Err(PuwumpError::PlanNotFound)
-    }
-
-    fn update(&mut self, db: &Db, id: Option<Uuid>) -> Result<()> {
+    fn update(&mut self, db: &Db) -> Result<()> {
         self.update_plans(db)?;
-        self.update_exercises(db, id)?;
+        self.update_exercises(db)?;
 
         Ok(())
     }
@@ -97,14 +67,38 @@ impl PuwumpUi {
 
             ui.vertical(|ui| {
                 ui.set_width(left_width);
+                let drop_down_height = height * 0.2;
+                let list_height = height - drop_down_height - margin;
 
-                if ui
-                    .add_sized([left_width, height * 0.07], egui::Button::new("Update Plans"))
-                    .clicked()
-                {
-                    self.plan_hndl
-                        .update_plans(&self.db)
-                        .unwrap();
+                let orig = ui.spacing().interact_size.y;
+                self.plan_drop_down(ui, left_width);
+                ui.spacing_mut().interact_size.y = orig;
+
+                ui.add_space(margin);
+                self.plan_hndl.update(&self.db).unwrap();
+                let exercises = { if let Some(exs) = &self.plan_hndl.plan_ex { exs } else { return } };
+                let results = self.add_list(
+                    ui,
+                    left_width,
+                    list_height,
+                    inner_margin,
+                    exercises,
+                    &[ButtonTheme::delete(), ButtonTheme::move_up(), ButtonTheme::move_down(), ButtonTheme::plus(), ButtonTheme::minus()],
+                );
+                for (id, clicked) in results {
+                    if clicked[0] {
+                        self.db
+                            .remove_plan_exercise(id)
+                            .unwrap();
+                    } else if clicked[1] {
+                        let _ = self.db.move_plan_exercise(id, -1);
+                    } else if clicked[2] {
+                        let _ = self.db.move_plan_exercise(id, 1);
+                    } else if clicked[3] {
+                        self.db.incr_plan_exercise(id).unwrap();
+                    } else if clicked[4] {
+                        self.db.decr_plan_exercise(id).unwrap();
+                    }
                 }
             });
 
@@ -112,68 +106,124 @@ impl PuwumpUi {
             ui.separator();
             ui.add_space(margin);
 
-            if let Some(id) = self.card_list(ui, list_width, available_height, inner_margin) {
-                self.plan_hndl
-                    .update(&self.db, Some(id))
-                    .unwrap();
+            for (id, clicked) in self.add_list(ui, list_width, available_height, inner_margin, &self.exercise_hndl.data, &[ButtonTheme::add()]) {
+                if clicked[0] {
+                    if let Some(plan_id) = self
+                        .plan_hndl
+                        .selected
+                        .as_ref()
+                        .map(|p| p.id)
+                    {
+                        self.db
+                            .insert_plan_exercise(plan_id, id, 1)
+                            .unwrap();
+                        self.plan_hndl.update(&self.db).unwrap();
+                    }
+                }
             }
         });
     }
 
-    pub fn card_list(&self, ui: &mut Ui, list_width: f32, available_height: f32, inner_margin: i8) -> Option<Uuid> {
-        let margin = self.sizes.margin / 3.0;
-        let mut to_delete = None;
-        ui.vertical(|ui| {
-            ui.set_width(list_width);
-            ui.set_min_height(available_height);
-            egui::ScrollArea::vertical()
-                .max_width(list_width - margin)
-                .max_height(available_height)
-                .show(ui, |ui| {
-                    if let Some(plans) = &self.plan_hndl.plans {
-                        for plan in plans.iter() {
-                            if self.add_plan_card(ui, plan, list_width, margin, inner_margin) {
-                                to_delete = Some(plan.id);
-                            }
-                            ui.add_space(margin * 0.5);
-                        }
-                        ui.add_space(margin);
-                    }
-                });
-        });
-        to_delete
-    }
+    pub fn plan_drop_down(&mut self, ui: &mut Ui, width: f32) {
+        let selected_text = self
+            .plan_hndl
+            .selected
+            .as_ref()
+            .map(|p| p.name.as_str())
+            .unwrap_or("    select plan");
+        ui.spacing_mut().interact_size.y = 40.0;
 
-    pub fn add_plan_card(&self, ui: &mut Ui, plan: &Plan, list_width: f32, margin: f32, inner_margin: i8) -> bool {
-        let mut deleted = false;
-        egui::Frame::NONE
-            .fill(self.theme.text_field)
-            .corner_radius(self.sizes.corner_radius)
-            .inner_margin(egui::Margin::same(inner_margin))
-            .show(ui, |ui| {
-                ui.set_width(list_width - margin * 2.0);
-                ui.horizontal(|ui| {
-                    ui.label(
+        self.set_dropdown_rounding(ui);
+
+        egui::ComboBox::from_id_salt("plan_selector")
+            .selected_text(
+                RichText::new(selected_text)
+                    .color(self.theme.fg)
+                    .size(16.0),
+            )
+            .width(width)
+            .show_ui(ui, |ui| {
+                ui.style_mut()
+                    .visuals
+                    .widgets
+                    .inactive
+                    .bg_fill = self.theme.text_field;
+                ui.style_mut()
+                    .visuals
+                    .widgets
+                    .hovered
+                    .bg_fill = self.theme.header_bg;
+
+                self.plan_hndl
+                    .update_plans(&self.db)
+                    .unwrap();
+
+                let plans = self
+                    .plan_hndl
+                    .plans
+                    .clone()
+                    .unwrap_or_default();
+
+                for plan in plans.iter() {
+                    ui.selectable_value(
+                        &mut self.plan_hndl.selected,
+                        Some(plan.clone()),
                         RichText::new(&plan.name)
-                            .color(self.theme.title)
-                            .strong()
+                            .color(self.theme.fg)
                             .size(20.0),
                     );
-                    if self.delete_button(ui) {
-                        deleted = true
-                    }
-                });
-                ui.separator();
-                ui.add(
-                    egui::Label::new(
-                        RichText::new(&plan.description)
-                            .color(self.theme.fg)
-                            .weak()
-                            .size(16.0),
-                    )
-                    .wrap(),
-                );
+                }
             });
-        deleted
+        self.reset_dropdown_rounding(ui);
+    }
+
+    pub fn set_dropdown_rounding(&self, ui: &mut Ui) {
+        let rad = self.sizes.corner_radius as u8;
+        let corner_radius = egui::CornerRadius::same(rad);
+
+        ui.visuals_mut()
+            .widgets
+            .inactive
+            .corner_radius = corner_radius;
+        ui.visuals_mut()
+            .widgets
+            .active
+            .corner_radius = corner_radius;
+        ui.visuals_mut()
+            .widgets
+            .hovered
+            .corner_radius = corner_radius;
+        ui.visuals_mut()
+            .widgets
+            .open
+            .corner_radius = corner_radius;
+
+        ui.ctx().global_style_mut(|style| {
+            style.visuals.menu_corner_radius = corner_radius;
+        });
+    }
+
+    pub fn reset_dropdown_rounding(&self, ui: &mut Ui) {
+        let default = egui::CornerRadius::default();
+
+        ui.visuals_mut()
+            .widgets
+            .inactive
+            .corner_radius = default;
+        ui.visuals_mut()
+            .widgets
+            .active
+            .corner_radius = default;
+        ui.visuals_mut()
+            .widgets
+            .hovered
+            .corner_radius = default;
+        ui.visuals_mut()
+            .widgets
+            .open
+            .corner_radius = default;
+        ui.ctx().global_style_mut(|style| {
+            style.visuals.menu_corner_radius = default;
+        });
     }
 }

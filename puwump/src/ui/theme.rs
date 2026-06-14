@@ -34,3 +34,53 @@ impl Default for Theme {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub struct ButtonTheme {
+    pub color: Color32,
+    pub symbol: char,
+}
+
+impl ButtonTheme {
+    pub fn delete() -> Self {
+        Self {
+            color: Color32::from_rgb(204, 36, 29),
+            symbol: 'X',
+        }
+    }
+
+    pub fn add() -> Self {
+        Self {
+            color: Color32::from_rgb(184, 187, 38),
+            symbol: 'O',
+        }
+    }
+
+    pub fn minus() -> Self {
+        Self {
+            color: Color32::from_rgb(204, 36, 29),
+            symbol: '-',
+        }
+    }
+
+    pub fn plus() -> Self {
+        Self {
+            color: Color32::from_rgb(184, 187, 38),
+            symbol: '+',
+        }
+    }
+
+    pub fn move_up() -> Self {
+        Self {
+            color: Color32::from_rgb(69, 133, 136),
+            symbol: '^',
+        }
+    }
+
+    pub fn move_down() -> Self {
+        Self {
+            color: Color32::from_rgb(69, 133, 136),
+            symbol: 'v',
+        }
+    }
+}

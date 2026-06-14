@@ -9,7 +9,6 @@ use crate::{
     models::{
         Plan, PlanExerciseDetail,
         core::{Model, statement_to_model},
-        exercise,
     },
     util::ids_from_statement,
 };
@@ -91,8 +90,20 @@ impl Db {
     }
 
     pub fn remove_plan_exercise(&self, id: Uuid) -> Result<()> {
+        let (plan_id, order_index): (String, i16) = self
+            .con
+            .query_row("SELECT plan_id, order_index FROM plan_exercise WHERE id = ?1", params![id.to_string()], |row| {
+                Ok((row.get(0)?, row.get(1)?))
+            })?;
+
         self.con
-            .execute("DELETE FROM plan_exercise WHERE id = ?1", (id.to_string(),))?;
+            .execute("DELETE FROM plan_exercise WHERE id = ?1", params![id.to_string()])?;
+
+        self.con.execute(
+            "UPDATE plan_exercise SET order_index = order_index - 1 WHERE plan_id = ?1 AND order_index > ?2",
+            params![plan_id, order_index],
+        )?;
+
         Ok(())
     }
 
@@ -104,18 +115,40 @@ impl Db {
             })?;
 
         let target = current + diff as i16;
+        if target < 0 {
+            return Ok(());
+        }
 
-        // Park our row at -1
+        // Park row at -1
         self.con
             .execute("UPDATE plan_exercise SET order_index = -1 WHERE id = ?1", params![id.to_string()])?;
-
         // Move neighbour to old slot
-        self.con
+        let moved = self
+            .con
             .execute("UPDATE plan_exercise SET order_index = ?3 WHERE plan_id = ?1 AND order_index = ?2", params![plan_id, target, current])?;
-
-        // Move row to the target slot
+        // If no exists, undo the park and return
+        if moved == 0 {
+            self.con
+                .execute("UPDATE plan_exercise SET order_index = ?2 WHERE id = ?1", params![id.to_string(), current])?;
+            return Ok(());
+        }
+        // Move row to target
         self.con
             .execute("UPDATE plan_exercise SET order_index = ?2 WHERE id = ?1", params![id.to_string(), target])?;
+
+        Ok(())
+    }
+
+    pub fn incr_plan_exercise(&self, id: Uuid) -> Result<()> {
+        self.con
+            .execute("UPDATE plan_exercise SET reps = reps + 1 WHERE id = ?1", (id.to_string(),))?;
+
+        Ok(())
+    }
+
+    pub fn decr_plan_exercise(&self, id: Uuid) -> Result<()> {
+        self.con
+            .execute("UPDATE plan_exercise SET reps = MAX(reps - 1, 1) WHERE id = ?1", (id.to_string(),))?;
 
         Ok(())
     }
