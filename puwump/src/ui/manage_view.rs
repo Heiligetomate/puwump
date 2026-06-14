@@ -75,7 +75,6 @@ impl PuwumpUi {
                 ui.spacing_mut().interact_size.y = orig;
 
                 ui.add_space(margin);
-                self.plan_hndl.update(&self.db).unwrap();
                 let exercises = { if let Some(exs) = &self.plan_hndl.plan_ex { exs } else { return } };
                 let results = self.add_list(
                     ui,
@@ -90,14 +89,29 @@ impl PuwumpUi {
                         self.db
                             .remove_plan_exercise(id)
                             .unwrap();
+                        self.plan_hndl
+                            .update_exercises(&self.db)
+                            .unwrap();
                     } else if clicked[1] {
                         let _ = self.db.move_plan_exercise(id, -1);
+                        self.plan_hndl
+                            .update_exercises(&self.db)
+                            .unwrap();
                     } else if clicked[2] {
                         let _ = self.db.move_plan_exercise(id, 1);
+                        self.plan_hndl
+                            .update_exercises(&self.db)
+                            .unwrap();
                     } else if clicked[3] {
                         self.db.incr_plan_exercise(id).unwrap();
+                        self.plan_hndl
+                            .update_exercises(&self.db)
+                            .unwrap();
                     } else if clicked[4] {
                         self.db.decr_plan_exercise(id).unwrap();
+                        self.plan_hndl
+                            .update_exercises(&self.db)
+                            .unwrap();
                     }
                 }
             });
