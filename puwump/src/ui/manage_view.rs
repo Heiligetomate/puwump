@@ -49,7 +49,7 @@ impl PlanHandler {
 }
 
 impl PuwumpUi {
-    pub fn manage_view(&mut self, ui: &mut Ui) {
+    pub fn edit_plan_view(&mut self, ui: &mut Ui) {
         let width = self.sizes.width;
         let height = self.sizes.height;
         let margin = self.sizes.margin;

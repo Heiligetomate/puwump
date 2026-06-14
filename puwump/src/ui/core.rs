@@ -13,6 +13,7 @@ pub enum View {
     AddExercise,
     AddIngredient,
     AddPlan,
+    EditPlan,
     Workout,
 }
 
@@ -58,9 +59,10 @@ impl eframe::App for PuwumpUi {
         ui.scope_builder(egui::UiBuilder::new().max_rect(content_rect), |ui| match self.view {
             View::Default => self.home_view(ui),
             View::AddExercise => self.add_exercise_view(ui),
-            View::AddPlan => self.manage_view(ui),
+            View::EditPlan => self.edit_plan_view(ui),
             View::Workout => self.work_out_view(ui),
             View::AddIngredient => self.add_ingredient_view(ui),
+            View::AddPlan => self.add_plan_view(ui),
         });
     }
 }
