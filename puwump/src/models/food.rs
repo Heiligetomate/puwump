@@ -1,6 +1,10 @@
-use uuid::Uuid;
+use crate::{
+    db::Db,
+    errors::Result,
+    models::{CardAdd, card_compatible::CardCrud, core::Model},
+};
 
-use crate::models::core::Model;
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub struct Ingredient {
@@ -51,5 +55,42 @@ impl Model for MealIngredientDetail {
             },
             amount_gr: row.get(2)?,
         })
+    }
+}
+
+impl CardAdd for Ingredient {
+    fn title(&self) -> &str {
+        &self.name
+    }
+
+    fn body(&self) -> Option<&str> {
+        None
+    }
+
+    fn key(&self) -> Uuid {
+        self.id
+    }
+}
+
+impl CardCrud for Ingredient {
+    fn get_all(db: &Db) -> Result<Vec<Self>> {
+        db.get_all_ingredients()
+    }
+
+    fn insert(db: &Db, name: &str, body: Option<&str>) -> Result<()> {
+        if body.is_some() {
+            panic!("Ingredient should never have a body");
+        }
+
+        db.insert_ingredient(name)?;
+        Ok(())
+    }
+
+    fn delete(db: &Db, id: Uuid) -> Result<()> {
+        db.remove_ingredient(id)
+    }
+
+    fn name() -> &'static str {
+        "ingredient"
     }
 }

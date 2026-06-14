@@ -1,10 +1,6 @@
 use uuid::Uuid;
 
-use crate::{
-    db::Db,
-    errors::Result,
-    models::{Exercise, Ingredient, core::Model},
-};
+use crate::{db::Db, errors::Result, models::core::Model};
 
 pub trait CardAdd: Model {
     fn title(&self) -> &str;
@@ -17,77 +13,4 @@ pub trait CardCrud: CardAdd + Model + Sized {
     fn insert(db: &Db, name: &str, body: Option<&str>) -> Result<()>;
     fn delete(db: &Db, id: Uuid) -> Result<()>;
     fn name() -> &'static str;
-}
-
-impl CardAdd for Exercise {
-    fn title(&self) -> &str {
-        &self.name
-    }
-
-    fn body(&self) -> Option<&str> {
-        Some(&self.instructions)
-    }
-
-    fn key(&self) -> Uuid {
-        self.id
-    }
-}
-
-impl CardCrud for Exercise {
-    fn get_all(db: &Db) -> Result<Vec<Self>> {
-        db.get_all_exercises()
-    }
-
-    fn insert(db: &Db, name: &str, body: Option<&str>) -> Result<()> {
-        if body.is_none() {
-            panic!("Exercise should always have a body");
-        }
-
-        db.insert_exercise(name, body.unwrap())
-    }
-
-    fn delete(db: &Db, id: Uuid) -> Result<()> {
-        db.remove_exercise(id)
-    }
-
-    fn name() -> &'static str {
-        "exercise"
-    }
-}
-
-impl CardAdd for Ingredient {
-    fn title(&self) -> &str {
-        &self.name
-    }
-
-    fn body(&self) -> Option<&str> {
-        None
-    }
-
-    fn key(&self) -> Uuid {
-        self.id
-    }
-}
-
-impl CardCrud for Ingredient {
-    fn get_all(db: &Db) -> Result<Vec<Self>> {
-        db.get_all_ingredients()
-    }
-
-    fn insert(db: &Db, name: &str, body: Option<&str>) -> Result<()> {
-        if body.is_some() {
-            panic!("Ingredient should never have a body");
-        }
-
-        db.insert_ingredient(name)?;
-        Ok(())
-    }
-
-    fn delete(db: &Db, id: Uuid) -> Result<()> {
-        db.remove_ingredient(id)
-    }
-
-    fn name() -> &'static str {
-        "ingredient"
-    }
 }
