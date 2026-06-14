@@ -1,4 +1,4 @@
-use egui::{Button, Color32, RichText, Ui};
+use egui::{Button, Color32, Margin, RichText, Stroke, Ui};
 
 use crate::ui::{
     core::{PuwumpUi, View},
@@ -41,13 +41,13 @@ impl PuwumpUi {
         ui.visuals_mut()
             .widgets
             .active
-            .bg_stroke = egui::Stroke::NONE;
+            .bg_stroke = Stroke::NONE;
 
-        ui.visuals_mut().selection.stroke = egui::Stroke::NONE;
+        ui.visuals_mut().selection.stroke = Stroke::NONE;
         ui.visuals_mut()
             .widgets
             .hovered
-            .bg_stroke = egui::Stroke::NONE;
+            .bg_stroke = Stroke::NONE;
     }
 
     pub fn calc_button_height(&self, ui: &Ui, cnt: u8) -> f32 {
@@ -79,7 +79,7 @@ pub fn text_field(ui: &mut Ui, theme: &Theme, sizes: &SizeSheet, add_contents: i
     egui::Frame::NONE
         .fill(theme.text_field)
         .corner_radius(sizes.corner_radius)
-        .inner_margin(egui::Margin::same(sizes.margin as i8))
+        .inner_margin(Margin::same(sizes.margin as i8))
         .show(ui, |ui| {
             add_contents(ui);
         });

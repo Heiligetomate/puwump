@@ -1,5 +1,5 @@
-use eframe::CreationContext;
-use egui::{Button, RichText, Ui};
+use eframe::{CreationContext, Frame};
+use egui::{Align2, Button, FontId, Rect, RichText, Ui, UiBuilder};
 
 use crate::{
     db::Db,
@@ -42,7 +42,7 @@ impl PuwumpUi {
 }
 
 impl eframe::App for PuwumpUi {
-    fn ui(&mut self, ui: &mut Ui, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut Ui, _frame: &mut Frame) {
         let full_rect = ui.available_rect_before_wrap();
         let full_width = full_rect.width();
         let full_height = full_rect.height();
@@ -50,10 +50,10 @@ impl eframe::App for PuwumpUi {
 
         self.sizes.update(ui);
 
-        let header_rect = egui::Rect::from_min_size(full_rect.min, egui::vec2(full_width, header_height));
-        let content_rect = egui::Rect::from_min_max(egui::pos2(full_rect.min.x, full_rect.min.y + header_height), full_rect.max);
+        let header_rect = Rect::from_min_size(full_rect.min, egui::vec2(full_width, header_height));
+        let content_rect = Rect::from_min_max(egui::pos2(full_rect.min.x, full_rect.min.y + header_height), full_rect.max);
 
-        ui.scope_builder(egui::UiBuilder::new().max_rect(header_rect), |ui| {
+        ui.scope_builder(UiBuilder::new().max_rect(header_rect), |ui| {
             self.header(ui, full_width, full_height);
         });
 
@@ -86,7 +86,7 @@ impl PuwumpUi {
             .rect_filled(rect, 0.0, self.theme.header_bg);
 
         ui.painter()
-            .text(rect.center(), egui::Align2::CENTER_CENTER, self.get_title(), egui::FontId::proportional(font_size), self.theme.title);
+            .text(rect.center(), Align2::CENTER_CENTER, self.get_title(), FontId::proportional(font_size), self.theme.title);
 
         let button_rect = egui::Rect::from_min_size(rect.min + egui::vec2(margin, (header_height - button_height) / 2.0), egui::vec2(button_width, button_height));
 
