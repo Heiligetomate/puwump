@@ -1,4 +1,5 @@
 use egui::{RichText, Ui};
+use uuid::Uuid;
 
 use crate::{
     db::Db,
@@ -15,11 +16,7 @@ pub struct PlanHandler {
 
 impl Default for PlanHandler {
     fn default() -> Self {
-        Self {
-            plans: None,
-            plan_ex: None,
-            selected: None,
-        }
+        Self { plans: None, plan_ex: None, selected: None }
     }
 }
 
@@ -178,6 +175,12 @@ impl PuwumpUi {
                     .clone()
                     .unwrap_or_default();
 
+                let before: Option<Uuid> = self
+                    .plan_hndl
+                    .selected
+                    .as_ref()
+                    .map(|p| p.id);
+
                 for plan in plans.iter() {
                     ui.selectable_value(
                         &mut self.plan_hndl.selected,
@@ -186,6 +189,17 @@ impl PuwumpUi {
                             .color(self.theme.fg)
                             .size(20.0),
                     );
+                }
+
+                let after: Option<Uuid> = self
+                    .plan_hndl
+                    .selected
+                    .as_ref()
+                    .map(|p| p.id);
+                if before != after {
+                    self.plan_hndl
+                        .update_exercises(&self.db)
+                        .unwrap();
                 }
             });
         self.reset_dropdown_rounding(ui);
