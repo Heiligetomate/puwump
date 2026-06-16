@@ -5,8 +5,8 @@ use crate::{
     db::Db,
     errors::Result,
     models::{
-        AddTaskHandler, Exercise, Ingredient, Plan,
-        card_compatible::{ExerciseInputs, IngredientInputs, PlanInputs},
+        AddTaskHandler, Exercise, Ingredient, Meal, Plan,
+        card_compatible::{ExerciseInputs, IngredientInputs, MealInputs, PlanInputs},
     },
     ui::{manage_view::PlanHandler, sizes::SizeSheet, theme::Theme},
 };
@@ -16,6 +16,7 @@ pub enum View {
     AddExercise,
     AddIngredient,
     AddPlan,
+    AddMeal,
     EditPlan,
     Workout,
 }
@@ -24,6 +25,7 @@ pub struct PuwumpUi {
     pub view: View,
     pub theme: Theme,
     pub sizes: SizeSheet,
+    pub meal_hndl: AddTaskHandler<Meal, MealInputs>,
     pub exercise_hndl: AddTaskHandler<Exercise, ExerciseInputs>,
     pub ingredient_hdnl: AddTaskHandler<Ingredient, IngredientInputs>,
     pub plan_handler: AddTaskHandler<Plan, PlanInputs>,
@@ -37,6 +39,7 @@ impl PuwumpUi {
             view: View::Default,
             theme: Theme::default(),
             sizes: SizeSheet::new(cc),
+            meal_hndl: AddTaskHandler::default(),
             exercise_hndl: AddTaskHandler::default(),
             ingredient_hdnl: AddTaskHandler::default(),
             plan_handler: AddTaskHandler::default(),
@@ -69,11 +72,18 @@ impl eframe::App for PuwumpUi {
             View::Workout => self.work_out_view(ui),
             View::AddIngredient => self.add_ingredient_view(ui),
             View::AddPlan => self.add_plan_view(ui),
+            View::AddMeal => self.add_meal_view(ui),
         });
     }
 }
 
 impl PuwumpUi {
+    fn add_meal_view(&mut self, ui: &mut Ui) {
+        let mut handler = std::mem::take(&mut self.meal_hndl);
+        self.add_view(ui, &mut handler);
+        self.meal_hndl = handler;
+    }
+
     fn add_plan_view(&mut self, ui: &mut Ui) {
         let mut handler = std::mem::take(&mut self.plan_handler);
         self.add_view(ui, &mut handler);

@@ -68,6 +68,18 @@ pub struct PlanInputs {
     fields: Vec<InputField>,
 }
 
+pub struct MealInputs {
+    fields: Vec<InputField>,
+}
+
+impl MealInputs {
+    pub fn new() -> Self {
+        Self {
+            fields: vec![InputField::title(), InputField::body("description"), InputField::extra("calories")],
+        }
+    }
+}
+
 impl ExerciseInputs {
     pub fn new() -> Self {
         Self {
@@ -137,6 +149,32 @@ impl CardInputs for ExerciseInputs {
 }
 
 impl CardInputs for IngredientInputs {
+    fn get_fields(&self) -> &[InputField] {
+        &self.fields
+    }
+
+    fn get_fields_mut(&mut self) -> Vec<&mut InputField> {
+        self.fields.iter_mut().collect()
+    }
+
+    fn is_empty(&self) -> bool {
+        for field in self.fields.iter() {
+            if field.value.is_empty() {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn clear(&mut self) {
+        for field in self.fields.iter_mut() {
+            field.value.clear();
+        }
+    }
+}
+
+impl CardInputs for MealInputs {
     fn get_fields(&self) -> &[InputField] {
         &self.fields
     }

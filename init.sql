@@ -30,26 +30,28 @@ CREATE TABLE IF NOT EXISTS completed_workout (
 );
 
 CREATE TABLE IF NOT EXISTS meal (
-    name        TEXT PRIMARY KEY,
+    id          TEXT PRIMARY KEY, 
+    name        TEXT NOT NULL UNIQUE,
     calories    INTEGER NOT NULL,
     description TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS ingredient (
-    name  TEXT NOT NULL UNIQUE,
-    id    TEXT PRIMARY KEY
+    id    TEXT PRIMARY KEY,
+    name  TEXT NOT NULL UNIQUE
 );
 
 create TABLE IF NOT EXISTS ingredient_in_meal (
+    id              TEXT PRIMARY KEY,
     amount_gr       INTEGER NOT NULL,
     meal_name       TEXT NOT NULL,
     ingredient_id   TEXT NOT NULL,
-    PRIMARY KEY     (meal_name, ingredient_id),
     FOREIGN KEY     (meal_name)       REFERENCES meal(name)   ON DELETE CASCADE, 
     FOREIGN KEY     (ingredient_id) REFERENCES ingredient(id) ON DELETE CASCADE
 );
 
 create TABLE IF NOT EXISTS meal_inhaled (
+    id          TEXT PRIMARY KEY, 
     date        TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     meal_name   TEXT NOT NULL, 
     FOREIGN KEY (meal_name) REFERENCES meal(name)

@@ -28,6 +28,7 @@ impl PuwumpUi {
 
     pub fn get_title(&self) -> &str {
         match self.view {
+            View::AddMeal => "Add Meal",
             View::EditPlan => "Edit Plan",
             View::AddExercise => "Add Exercise",
             View::Default => "Puwump - Home",

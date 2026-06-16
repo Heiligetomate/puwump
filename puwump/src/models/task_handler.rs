@@ -1,6 +1,6 @@
 use crate::models::{
-    CardAdd, Exercise, Ingredient, Plan,
-    card_compatible::{CardInputs, ExerciseInputs, IngredientInputs, PlanInputs},
+    CardAdd, Exercise, Ingredient, Meal, Plan,
+    card_compatible::{CardInputs, ExerciseInputs, IngredientInputs, MealInputs, PlanInputs},
     core::Model,
 };
 
@@ -34,6 +34,16 @@ impl Default for AddTaskHandler<Plan, PlanInputs> {
     fn default() -> Self {
         Self {
             input_fields: PlanInputs::new(),
+            data: Vec::new(),
+            status: None,
+        }
+    }
+}
+
+impl Default for AddTaskHandler<Meal, MealInputs> {
+    fn default() -> Self {
+        Self {
+            input_fields: MealInputs::new(),
             data: Vec::new(),
             status: None,
         }

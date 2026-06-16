@@ -98,10 +98,11 @@ impl Db {
     /// Add an ingredient to a meal
     /// Amount is amount in grams
     pub fn insert_meal_ingredient(&self, meal_name: &str, ingredient_id: Uuid, amount: u32) -> Result<()> {
+        let id = Uuid::new_v4();
         self.con
             .execute(
-                "INSERT INTO ingredient_in_meal (amount_gr, meal_name, ingredient_id) VALUES (?1, ?2, ?3)",
-                (amount, meal_name, ingredient_id.to_string()),
+                "INSERT INTO ingredient_in_meal (id, amount_gr, meal_name, ingredient_id) VALUES (?1, ?2, ?3, ?4)",
+                (id.to_string(), amount, meal_name, ingredient_id.to_string()),
             )
             .map_err(Self::map_sqlite_err)?;
         Ok(())
@@ -110,45 +111,50 @@ impl Db {
     /// Insert a new meal
     /// Name is unique
     pub fn insert_meal(&self, name: &str, description: &str, calories: u32) -> Result<()> {
+        let id = Uuid::new_v4();
         self.con
-            .execute("INSERT INTO meal (name, description, calories) VALUES (?1, ?2, ?3)", (name, description, calories))?;
+            .execute("INSERT INTO meal (id, name, description, calories) VALUES (?1, ?2, ?3, ?4)", (id.to_string(), name, description, calories))?;
         Ok(())
     }
 
-    /// Remove a meal by its name
-    pub fn remove_meal(&self, name: &str) -> Result<()> {
+    /// Remove a meal by its id
+    pub fn remove_meal(&self, id: Uuid) -> Result<()> {
         self.con
-            .execute("DELETE FROM meal WHERE name = ?1", (name,))?;
+            .execute("DELETE FROM meal WHERE id = ?1", (id.to_string(),))?;
         Ok(())
     }
 
-    /// Get a meal by its name
-    pub fn get_meal(&self, name: &str) -> Result<Meal> {
+    /// Get a meal by its id
+    pub fn get_meal(&self, id: Uuid) -> Result<Meal> {
         let stmt = self
             .con
-            .prepare("SELECT * FROM meal WHERE name = ?1")?;
-        statement_to_model(stmt, (name,))
+            .prepare("SELECT * FROM meal WHERE id = ?1")?;
+        statement_to_model(stmt, (id.to_string(),))
     }
 
-    /// Returns a Vec with all meal names
+    /// Returns a Vec with all meal ids
     /// Ordered by name, case-insensitive
-    pub fn get_all_meal_names(&self) -> Result<Vec<String>> {
+    pub fn get_all_meal_ids(&self) -> Result<Vec<Uuid>> {
         let mut stmt = self
             .con
-            .prepare("SELECT name FROM meal ORDER BY name COLLATE NOCASE ASC")?;
-        let names = stmt
+            .prepare("SELECT id FROM meal ORDER BY name COLLATE NOCASE ASC")?;
+        let raw_ids = stmt
             .query_map([], |row| row.get(0))?
             .collect::<rusqlite::Result<Vec<String>>>()
             .map_err(|_| PuwumpError::RowNotFound)?;
-        Ok(names)
+        let ids: Vec<Uuid> = raw_ids
+            .iter()
+            .filter_map(|i| Uuid::parse_str(i).ok())
+            .collect();
+        Ok(ids)
     }
 
     /// Returns a Vec with all meals as Meal objects
     /// Ordered by name, case-insensitive
     pub fn get_all_meals(&self) -> Result<Vec<Meal>> {
         let mut meals = Vec::new();
-        for name in self.get_all_meal_names()? {
-            meals.push(self.get_meal(&name)?);
+        for id in self.get_all_meal_ids()? {
+            meals.push(self.get_meal(id)?);
         }
         Ok(meals)
     }
