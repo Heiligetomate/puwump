@@ -4,7 +4,10 @@ use egui::{Align2, Button, FontId, Rect, RichText, Ui, UiBuilder};
 use crate::{
     db::Db,
     errors::Result,
-    models::{AddTaskHandler, Exercise, Ingredient},
+    models::{
+        AddTaskHandler, Exercise, Ingredient, Plan,
+        card_compatible::{ExerciseInputs, IngredientInputs, PlanInputs},
+    },
     ui::{manage_view::PlanHandler, sizes::SizeSheet, theme::Theme},
 };
 
@@ -21,8 +24,9 @@ pub struct PuwumpUi {
     pub view: View,
     pub theme: Theme,
     pub sizes: SizeSheet,
-    pub exercise_hndl: AddTaskHandler<Exercise>,
-    pub ingredient_hdnl: AddTaskHandler<Ingredient>,
+    pub exercise_hndl: AddTaskHandler<Exercise, ExerciseInputs>,
+    pub ingredient_hdnl: AddTaskHandler<Ingredient, IngredientInputs>,
+    pub plan_handler: AddTaskHandler<Plan, PlanInputs>,
     pub plan_hndl: PlanHandler,
     pub db: Db,
 }
@@ -35,6 +39,7 @@ impl PuwumpUi {
             sizes: SizeSheet::new(cc),
             exercise_hndl: AddTaskHandler::default(),
             ingredient_hdnl: AddTaskHandler::default(),
+            plan_handler: AddTaskHandler::default(),
             plan_hndl: PlanHandler::default(),
             db: Db::init()?,
         })
@@ -69,7 +74,11 @@ impl eframe::App for PuwumpUi {
 }
 
 impl PuwumpUi {
-    fn add_plan_view(&mut self, _: &mut Ui) {}
+    fn add_plan_view(&mut self, ui: &mut Ui) {
+        let mut handler = std::mem::take(&mut self.plan_handler);
+        self.add_view(ui, &mut handler);
+        self.plan_handler = handler;
+    }
 
     fn work_out_view(&mut self, _: &mut Ui) {}
 

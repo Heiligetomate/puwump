@@ -1,52 +1,51 @@
-use crate::models::{CardAdd, Exercise, Ingredient, core::Model};
+use crate::models::{
+    CardAdd, Exercise, Ingredient, Plan,
+    card_compatible::{CardInputs, ExerciseInputs, IngredientInputs, PlanInputs},
+    core::Model,
+};
 
-pub struct AddTaskHandler<A: Model + CardAdd> {
+pub struct AddTaskHandler<A: Model + CardAdd, I: CardInputs> {
+    pub input_fields: I,
     pub data: Vec<A>,
-    pub title_track: String,
-    pub body_track: Option<String>,
     pub status: Option<std::result::Result<(), String>>,
 }
 
-impl Default for AddTaskHandler<Ingredient> {
+impl Default for AddTaskHandler<Ingredient, IngredientInputs> {
     fn default() -> Self {
         Self {
+            input_fields: IngredientInputs::new(),
             data: Vec::new(),
-            title_track: String::new(),
-            body_track: None,
             status: None,
         }
     }
 }
 
-impl Default for AddTaskHandler<Exercise> {
+impl Default for AddTaskHandler<Exercise, ExerciseInputs> {
     fn default() -> Self {
         Self {
+            input_fields: ExerciseInputs::new(),
             data: Vec::new(),
-            title_track: String::new(),
-            body_track: Some(String::new()),
             status: None,
         }
     }
 }
 
-impl<A: Model + CardAdd> AddTaskHandler<A> {
-    pub fn track_empty(&self) -> bool {
-        self.title_track.is_empty()
-            || self
-                .body_track
-                .as_ref()
-                .is_some_and(|s| s.is_empty())
+impl Default for AddTaskHandler<Plan, PlanInputs> {
+    fn default() -> Self {
+        Self {
+            input_fields: PlanInputs::new(),
+            data: Vec::new(),
+            status: None,
+        }
     }
+}
 
+impl<A, I> AddTaskHandler<A, I>
+where
+    A: CardAdd,
+    I: CardInputs,
+{
     pub fn set_err(&mut self, msg: &str) {
         self.status = Some(Err(msg.to_owned()));
-    }
-
-    pub fn reset(&mut self) {
-        self.title_track.clear();
-
-        if let Some(body) = &mut self.body_track {
-            body.clear();
-        }
     }
 }

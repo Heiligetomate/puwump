@@ -3,13 +3,17 @@ use uuid::Uuid;
 
 use crate::{
     errors::PuwumpError,
-    models::{AddTaskHandler, CardAdd, card_compatible::CardCrud, core::Model},
+    models::{
+        AddTaskHandler, CardAdd,
+        card_compatible::{CardCrud, CardInputs},
+        core::Model,
+    },
     ui::{core::PuwumpUi, theme::ButtonTheme, util::text_field},
 };
 
 impl PuwumpUi {
     /// Generates the full view
-    pub fn add_view<A: CardCrud>(&mut self, ui: &mut Ui, task_handler: &mut AddTaskHandler<A>) {
+    pub fn add_view<A: CardCrud, I: CardInputs>(&mut self, ui: &mut Ui, task_handler: &mut AddTaskHandler<A, I>) {
         let width = self.sizes.width;
         let height = self.sizes.height;
         let margin = self.sizes.margin;
@@ -106,21 +110,23 @@ impl PuwumpUi {
     }
 
     /// Handles the input when the confirm button for the add task is pressed
-    pub fn on_add_confirm<A: CardCrud>(&mut self, task_handler: &mut AddTaskHandler<A>) {
-        if task_handler.track_empty() {
+    pub fn on_add_confirm<A: CardCrud, I: CardInputs>(&mut self, task_handler: &mut AddTaskHandler<A, I>) {
+        if task_handler.input_fields.is_empty() {
             task_handler.set_err("Fill out all fields");
             return;
         }
-        match A::insert(&self.db, &task_handler.title_track, task_handler.body_track.as_deref()) {
+
+        match A::insert(&self.db, task_handler.input_fields.get_fields()) {
             Ok(_) => {
                 task_handler.status = Some(Ok(()));
-                task_handler.reset();
+                task_handler.input_fields.clear();
                 task_handler.data = A::get_all(&self.db).unwrap(); // TODO: handle
             }
             Err(PuwumpError::UniqueViolation) => {
                 let err = format!("{} already exists.", A::name());
                 task_handler.set_err(err.as_str());
             }
+            Err(PuwumpError::InputFieldIntParse(e)) => task_handler.set_err(e),
             Err(e) => panic!("db is broken {e}"),
         }
     }
@@ -128,7 +134,7 @@ impl PuwumpUi {
     /// Does not do anything (returns) if the add task status is None
     /// Adds a green text "Successfully saved!" if the stuats is Ok()
     /// Adds a red text with the error message if the status is Err()
-    pub fn add_status<A: CardCrud>(&self, ui: &mut Ui, task_handler: &AddTaskHandler<A>) {
+    pub fn add_status<A: CardCrud, I: CardInputs>(&self, ui: &mut Ui, task_handler: &AddTaskHandler<A, I>) {
         let Some(status) = &task_handler.status else {
             return;
         };
@@ -142,7 +148,7 @@ impl PuwumpUi {
     }
 
     /// Full add form
-    fn add_form<A: CardCrud>(&mut self, ui: &mut Ui, form_width: f32, height: f32, task_handler: &mut AddTaskHandler<A>) {
+    fn add_form<A: CardCrud, I: CardInputs>(&mut self, ui: &mut Ui, form_width: f32, height: f32, task_handler: &mut AddTaskHandler<A, I>) {
         ui.vertical(|ui| {
             ui.set_width(form_width);
             self.add_form_fields(ui, form_width, task_handler);
@@ -155,27 +161,27 @@ impl PuwumpUi {
     }
 
     /// Creates the fields needed to create a new eercise  
-    fn add_form_fields<A: CardAdd>(&mut self, ui: &mut Ui, height: f32, task_handler: &mut AddTaskHandler<A>) {
-        text_field(ui, &self.theme, &self.sizes, |ui| {
-            ui.add(
-                TextEdit::singleline(&mut task_handler.title_track)
-                    .hint_text("Name")
-                    .desired_width(f32::INFINITY)
-                    .background_color(Color32::TRANSPARENT),
-            );
-        });
-        if let Some(body) = task_handler.body_track.as_mut() {
-            ui.add_space(height * 0.02);
-
+    fn add_form_fields<A: CardAdd, I: CardInputs>(&mut self, ui: &mut Ui, height: f32, task_handler: &mut AddTaskHandler<A, I>) {
+        let fields = task_handler
+            .input_fields
+            .get_fields_mut();
+        let last = fields.len().saturating_sub(1);
+        for (i, input) in fields.into_iter().enumerate() {
             text_field(ui, &self.theme, &self.sizes, |ui| {
+                let edit = if input.line_count > 1 {
+                    TextEdit::multiline(&mut input.value).desired_rows(input.line_count as usize)
+                } else {
+                    TextEdit::singleline(&mut input.value)
+                };
                 ui.add(
-                    TextEdit::multiline(body)
-                        .hint_text("Instructions")
+                    edit.hint_text(input.hint_text.as_str())
                         .desired_width(f32::INFINITY)
-                        .desired_rows(6)
                         .background_color(Color32::TRANSPARENT),
                 );
             });
+            if i < last {
+                ui.add_space(height * 0.02);
+            }
         }
     }
 }

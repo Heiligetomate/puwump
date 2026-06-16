@@ -77,12 +77,10 @@ impl CardCrud for Ingredient {
         db.get_all_ingredients()
     }
 
-    fn insert(db: &Db, name: &str, body: Option<&str>) -> Result<()> {
-        if body.is_some() {
-            panic!("Ingredient should never have a body");
-        }
-
+    fn insert(db: &Db, values: &[super::card_compatible::InputField]) -> Result<()> {
+        let name = values[0].value.as_str();
         db.insert_ingredient(name)?;
+
         Ok(())
     }
 

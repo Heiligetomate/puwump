@@ -3,7 +3,11 @@ use uuid::Uuid;
 use crate::{
     db::Db,
     errors::Result,
-    models::{CardAdd, card_compatible::CardCrud, core::Model},
+    models::{
+        CardAdd,
+        card_compatible::{CardCrud, InputField},
+        core::Model,
+    },
 };
 
 #[derive(Debug)]
@@ -43,12 +47,8 @@ impl CardCrud for Exercise {
         db.get_all_exercises()
     }
 
-    fn insert(db: &Db, name: &str, body: Option<&str>) -> Result<()> {
-        if body.is_none() {
-            panic!("Exercise should always have a body");
-        }
-
-        db.insert_exercise(name, body.unwrap())
+    fn insert(db: &Db, values: &[InputField]) -> Result<()> {
+        db.insert_exercise(values[0].value.as_str(), values[1].value.as_str())
     }
 
     fn delete(db: &Db, id: Uuid) -> Result<()> {
