@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::errors::{PuwumpError, Result};
 
 pub fn get_full_db_path() -> Result<PathBuf> {
-    let proj_dirs = ProjectDirs::from("com", "yourname", "puwump").ok_or(PuwumpError::HomeNotFound)?;
+    let proj_dirs = ProjectDirs::from("io", "puwump", "puwump").ok_or(PuwumpError::HomeNotFound)?;
 
     Ok(proj_dirs.data_dir().join("puwump.db"))
 }
