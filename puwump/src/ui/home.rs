@@ -4,7 +4,7 @@ use crate::ui::core::{PuwumpUi, View};
 
 impl PuwumpUi {
     pub fn home_view(&mut self, ui: &mut Ui) {
-        let button_height = self.calc_button_height(ui, 6);
+        let button_height = self.calc_button_height(ui, 7);
 
         let spc = self.spacing(ui);
 

@@ -4,6 +4,7 @@ pub type Result<T> = std::result::Result<T, PuwumpError>;
 
 #[derive(Debug, Clone)]
 pub enum PuwumpError {
+    SelectedDataNotFound,
     PlanNotFound,
     HomeNotFound,
     Ui(String),
@@ -20,6 +21,7 @@ pub enum PuwumpError {
 impl Display for PuwumpError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::SelectedDataNotFound => write!(f, "selected data in handler not found"),
             Self::InputFieldIntParse(e) => write!(f, "{e}"),
             Self::PlanNotFound => write!(f, "plan was not found"),
             Self::Ui(e) => write!(f, "Ui error: {e}"),

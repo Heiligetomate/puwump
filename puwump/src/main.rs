@@ -77,6 +77,20 @@ fn main() -> Result<()> {
     let db = &Db::init()?.reset()?;
     generate_plan_examples(&db)?;
     generate_exercise_examples(&db)?;
+    db.insert_plan_exercise(
+        db.get_all_plans()
+            .unwrap()
+            .get(0)
+            .unwrap()
+            .id,
+        db.get_all_exercises()
+            .unwrap()
+            .get(0)
+            .unwrap()
+            .id,
+        3,
+    )
+    .unwrap();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()

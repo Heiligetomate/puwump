@@ -2,51 +2,12 @@ use egui::{RichText, Ui};
 use uuid::Uuid;
 
 use crate::{
-    db::Db,
-    errors::Result,
-    models::{Plan, PlanExerciseDetail},
+    models::{CardAdd, EditHandler},
     ui::{core::PuwumpUi, theme::ButtonTheme},
 };
 
-pub struct PlanHandler {
-    selected: Option<Plan>,
-    plans: Option<Vec<Plan>>,
-    plan_ex: Option<Vec<PlanExerciseDetail>>,
-}
-
-impl Default for PlanHandler {
-    fn default() -> Self {
-        Self { plans: None, plan_ex: None, selected: None }
-    }
-}
-
-impl PlanHandler {
-    fn update_plans(&mut self, db: &Db) -> Result<()> {
-        let plans = db.get_all_plans()?;
-        self.plans = Some(plans);
-
-        Ok(())
-    }
-
-    fn update_exercises(&mut self, db: &Db) -> Result<()> {
-        if let Some(plan) = &self.selected {
-            let exercises = db.get_plan_exercises(plan.id)?;
-            self.plan_ex = Some(exercises);
-        }
-
-        Ok(())
-    }
-
-    fn update(&mut self, db: &Db) -> Result<()> {
-        self.update_plans(db)?;
-        self.update_exercises(db)?;
-
-        Ok(())
-    }
-}
-
 impl PuwumpUi {
-    pub fn edit_plan_view(&mut self, ui: &mut Ui) {
+    pub fn edit_view<H: EditHandler>(&mut self, ui: &mut Ui, handler: &mut H) {
         let width = self.sizes.width;
         let height = self.sizes.height;
         let margin = self.sizes.margin;
@@ -68,11 +29,11 @@ impl PuwumpUi {
                 let list_height = height - drop_down_height - margin;
 
                 let orig = ui.spacing().interact_size.y;
-                self.plan_drop_down(ui, left_width);
+                self.plan_drop_down(ui, left_width, handler);
                 ui.spacing_mut().interact_size.y = orig;
 
                 ui.add_space(margin);
-                let exercises = { if let Some(exs) = &self.plan_hndl.plan_ex { exs } else { return } };
+                let exercises = { if let Ok(exs) = handler.get_sel_data() { exs } else { return } };
                 let results = self.add_list(
                     ui,
                     left_width,
@@ -86,28 +47,28 @@ impl PuwumpUi {
                         self.db
                             .remove_plan_exercise(id)
                             .unwrap();
-                        self.plan_hndl
-                            .update_exercises(&self.db)
+                        handler
+                            .updated_sel_data(&self.db)
                             .unwrap();
                     } else if clicked[1] {
                         let _ = self.db.move_plan_exercise(id, -1);
-                        self.plan_hndl
-                            .update_exercises(&self.db)
+                        handler
+                            .updated_sel_data(&self.db)
                             .unwrap();
                     } else if clicked[2] {
                         let _ = self.db.move_plan_exercise(id, 1);
-                        self.plan_hndl
-                            .update_exercises(&self.db)
+                        handler
+                            .updated_sel_data(&self.db)
                             .unwrap();
                     } else if clicked[3] {
                         self.db.incr_plan_exercise(id).unwrap();
-                        self.plan_hndl
-                            .update_exercises(&self.db)
+                        handler
+                            .updated_sel_data(&self.db)
                             .unwrap();
                     } else if clicked[4] {
                         self.db.decr_plan_exercise(id).unwrap();
-                        self.plan_hndl
-                            .update_exercises(&self.db)
+                        handler
+                            .updated_sel_data(&self.db)
                             .unwrap();
                     }
                 }
@@ -117,36 +78,36 @@ impl PuwumpUi {
             ui.separator();
             ui.add_space(margin);
 
+            // TODO not plan
             for (id, clicked) in self.add_list(ui, list_width, available_height, inner_margin, &self.exercise_hndl.data, &[ButtonTheme::add()]) {
                 if clicked[0] {
-                    if let Some(plan_id) = self
-                        .plan_hndl
-                        .selected
+                    if let Some(plan_id) = handler
+                        .get_selected()
                         .as_ref()
-                        .map(|p| p.id)
+                        .map(|p| p.key())
                     {
                         self.db
                             .insert_plan_exercise(plan_id, id, 1)
                             .unwrap();
-                        self.plan_hndl.update(&self.db).unwrap();
+                        self.edit_plan_hndl
+                            .update(&self.db)
+                            .unwrap();
                     }
                 }
             }
         });
     }
 
-    pub fn plan_drop_down(&mut self, ui: &mut Ui, width: f32) {
-        let selected_text = self
-            .plan_hndl
-            .selected
-            .as_ref()
-            .map(|p| p.name.as_str())
-            .unwrap_or("    select plan");
+    pub fn plan_drop_down<H: EditHandler>(&mut self, ui: &mut Ui, width: f32, handler: &mut H) {
+        let selected_text = handler
+            .get_selected()
+            .map(|p| p.title())
+            .unwrap_or("    select");
         ui.spacing_mut().interact_size.y = 40.0;
 
         self.set_dropdown_rounding(ui);
 
-        egui::ComboBox::from_id_salt("plan_selector")
+        egui::ComboBox::from_id_salt("selector")
             .selected_text(
                 RichText::new(selected_text)
                     .color(self.theme.fg)
@@ -165,46 +126,50 @@ impl PuwumpUi {
                     .hovered
                     .bg_fill = self.theme.header_bg;
 
-                self.plan_hndl
-                    .update_plans(&self.db)
-                    .unwrap();
+                handler.update(&self.db).unwrap();
 
-                let plans = self
-                    .plan_hndl
-                    .plans
-                    .clone()
-                    .unwrap_or_default();
+                let data = handler.get_data();
+                let before = handler.get_selected().map(|p| p.key());
+                let mut new_selected = handler.get_selected().map(|p| p.key());
 
-                let before: Option<Uuid> = self
-                    .plan_hndl
-                    .selected
-                    .as_ref()
-                    .map(|p| p.id);
-
-                for plan in plans.iter() {
-                    ui.selectable_value(
-                        &mut self.plan_hndl.selected,
-                        Some(plan.clone()),
-                        RichText::new(&plan.name)
-                            .color(self.theme.fg)
-                            .size(20.0),
-                    );
+                for entry in data.iter() {
+                    let is_selected = new_selected == Some(entry.key());
+                    if ui
+                        .selectable_label(
+                            is_selected,
+                            RichText::new(entry.title())
+                                .color(self.theme.fg)
+                                .size(20.0),
+                        )
+                        .clicked()
+                    {
+                        new_selected = Some(entry.key());
+                    }
                 }
 
-                let after: Option<Uuid> = self
-                    .plan_hndl
-                    .selected
+                if new_selected != before {
+                    if let Some(id) = new_selected {
+                        handler
+                            .update_sel(&self.db, id)
+                            .unwrap();
+                    }
+                }
+                let after: Option<Uuid> = handler
+                    .get_selected()
                     .as_ref()
-                    .map(|p| p.id);
+                    .map(|p| p.key());
+
                 if before != after {
-                    self.plan_hndl
-                        .update_exercises(&self.db)
+                    handler
+                        .updated_sel_data(&self.db)
                         .unwrap();
                 }
             });
         self.reset_dropdown_rounding(ui);
     }
 
+    /// This function sets the correct rounding / styling for drop downs
+    /// The reset_dropdown_rounding function should be called after the drop down was created
     pub fn set_dropdown_rounding(&self, ui: &mut Ui) {
         let rad = self.sizes.corner_radius as u8;
         let corner_radius = egui::CornerRadius::same(rad);
@@ -231,6 +196,9 @@ impl PuwumpUi {
         });
     }
 
+    /// This function should be called after a dropdown was created
+    /// and the set_dropdown_rounding was called
+    /// This function should prevent conflict between ui settings
     pub fn reset_dropdown_rounding(&self, ui: &mut Ui) {
         let default = egui::CornerRadius::default();
 
