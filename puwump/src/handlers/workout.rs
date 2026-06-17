@@ -30,6 +30,8 @@ pub struct WorkoutHandler {
     pub rest_secs: u32,
     pub remaining_secs: f32,
     pub last_tick: Option<Instant>,
+
+    pub db_entry: bool,
 }
 
 impl Default for WorkoutHandler {
@@ -43,6 +45,7 @@ impl Default for WorkoutHandler {
             rest_secs: DEFAULT_REST_SECS,
             remaining_secs: 0.0,
             last_tick: None,
+            db_entry: false,
         }
     }
 }
@@ -61,6 +64,7 @@ impl WorkoutHandler {
         let exercises = db.get_plan_exercises(id)?;
         self.selected = Some(plan);
         self.exercises = exercises;
+        self.db_entry = false;
         self.restart_workout();
         Ok(())
     }
@@ -78,6 +82,7 @@ impl WorkoutHandler {
     }
 
     pub fn restart_workout(&mut self) {
+        self.db_entry = false;
         self.current_index = 0;
         self.phase = if self.exercises.is_empty() { Phase::Done } else { Phase::Exercise };
         self.remaining_secs = 0.0;
@@ -131,5 +136,16 @@ impl WorkoutHandler {
 
     pub fn remaining_whole_secs(&self) -> u32 {
         self.remaining_secs.ceil() as u32
+    }
+
+    pub fn db_log(&mut self, db: &Db) -> Result<()> {
+        if let Some(plan) = &self.selected
+            && !self.db_entry
+        {
+            db.plan_finished_entry(plan.id)?;
+            self.db_entry = true;
+        }
+
+        Ok(())
     }
 }

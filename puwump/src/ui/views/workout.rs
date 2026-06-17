@@ -278,6 +278,9 @@ impl PuwumpUi {
                 .strong()
                 .size(28.0),
         );
+
+        handler.db_log(&self.db).unwrap();
+
         ui.add_space(self.sizes.margin);
 
         if self.button(ui, self.sizes.width * 0.3, self.sizes.height * 0.07, self.theme.blue, "Restart") {

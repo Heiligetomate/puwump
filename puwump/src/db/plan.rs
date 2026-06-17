@@ -153,4 +153,12 @@ impl Db {
 
         Ok(())
     }
+
+    pub fn plan_finished_entry(&self, plan_id: Uuid) -> Result<()> {
+        let id = Uuid::new_v4();
+        self.con
+            .execute("INSERT INTO completed_workout (id, plan_id, time_min) VALUES (?1, ?2, ?3)", (id.to_string(), plan_id.to_string(), 1))?;
+        // TODO: track the time
+        Ok(())
+    }
 }
