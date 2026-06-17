@@ -31,7 +31,13 @@ impl PuwumpUi {
             ui.add_space(margin * 1.5);
 
             if self.button(ui, width * 0.6, height * 0.1, self.theme.green, "Mampf") {
-                // TODO: make mampf
+                if let Some(meal) = &handler.selected {
+                    self.db
+                        .insert_meal_mampf(meal.id)
+                        .unwrap();
+                    println!("yummy");
+                }
+                // TODO: display mampf or somethign
             }
         });
     }

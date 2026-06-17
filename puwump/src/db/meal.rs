@@ -194,4 +194,12 @@ impl Db {
             .execute("DELETE FROM ingredient_in_meal WHERE id = ?1", (id.to_string(),))?;
         Ok(())
     }
+
+    pub fn insert_meal_mampf(&self, meal_id: Uuid) -> Result<()> {
+        let id = Uuid::new_v4();
+        self.con
+            .execute("INSERT INTO meal_inhaled (id, meal_id) VALUES (?1, ?2)", (id.to_string(), meal_id.to_string()))?;
+
+        Ok(())
+    }
 }

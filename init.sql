@@ -53,6 +53,6 @@ create TABLE IF NOT EXISTS ingredient_in_meal (
 create TABLE IF NOT EXISTS meal_inhaled (
     id          TEXT PRIMARY KEY, 
     date        TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    meal_name   TEXT NOT NULL, 
-    FOREIGN KEY (meal_name) REFERENCES meal(name)
+    meal_id     TEXT NOT NULL, 
+    FOREIGN KEY (meal_id) REFERENCES meal(id)
 )
