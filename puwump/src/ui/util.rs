@@ -35,6 +35,7 @@ impl PuwumpUi {
             View::Workout => "Workout",
             View::AddIngredient => "Add ingredient",
             View::AddPlan => "Add Plan",
+            View::EditMeal => "Edit Meal",
         }
     }
 

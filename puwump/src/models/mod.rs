@@ -9,6 +9,7 @@ mod task_handler;
 
 pub use card_compatible::CardAdd;
 pub use edit_handler::EditHandler;
+pub use edit_handler::MealEditHandler;
 pub use edit_handler::PlanEditHandler;
 pub use exercise::Exercise;
 pub use food::Ingredient;

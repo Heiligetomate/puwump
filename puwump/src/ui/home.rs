@@ -1,6 +1,9 @@
 use egui::Ui;
 
-use crate::ui::core::{PuwumpUi, View};
+use crate::{
+    models::EditHandler,
+    ui::core::{PuwumpUi, View},
+};
 
 impl PuwumpUi {
     pub fn home_view(&mut self, ui: &mut Ui) {
@@ -48,6 +51,14 @@ impl PuwumpUi {
                     .get_all_exercises()
                     .unwrap_or_default();
                 self.view = View::EditPlan;
+            }
+
+            ui.add_space(spc);
+            if self.button_full_width(ui, button_height, self.theme.green, "Edit Meal") {
+                self.edit_meal_hndl
+                    .update_selectable(&self.db)
+                    .unwrap();
+                self.view = View::EditMeal;
             }
 
             ui.add_space(spc);

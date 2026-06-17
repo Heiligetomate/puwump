@@ -33,8 +33,8 @@ impl PuwumpUi {
                 ui.spacing_mut().interact_size.y = orig;
 
                 ui.add_space(margin);
-                let exercises = { if let Ok(exs) = handler.get_sel_data() { exs } else { return } };
-                let results = self.add_list(ui, left_width, list_height, inner_margin, exercises, H::card_buttons());
+                let sel_data = { if let Ok(exs) = handler.get_sel_data() { exs } else { return } };
+                let results = self.add_list(ui, left_width, list_height, inner_margin, sel_data, H::card_buttons());
 
                 handler
                     .handle_buttons(results, &self.db)
@@ -44,19 +44,18 @@ impl PuwumpUi {
             ui.add_space(margin);
             ui.separator();
             ui.add_space(margin);
-
-            // TODO not plan
-            for (id, clicked) in self.add_list(ui, list_width, available_height, inner_margin, &self.exercise_hndl.data, &[ButtonTheme::add()]) {
+            for (id, clicked) in self.add_list(ui, list_width, available_height, inner_margin, handler.get_selectable(), &[ButtonTheme::add()]) {
                 if clicked[0] {
-                    if handler
+                    if handler.sel_is_none() {
+                        return;
+                    }
+                    handler
                         .insert_handler_model(&self.db, id)
-                        .is_ok()
-                    {
-                        println!("inserted");
-                        handler
-                            .updated_sel_data(&self.db)
-                            .unwrap();
-                    };
+                        .unwrap();
+
+                    handler
+                        .updated_sel_data(&self.db)
+                        .unwrap();
                 }
             }
         });
@@ -66,7 +65,7 @@ impl PuwumpUi {
         let selected_text = handler
             .get_selected()
             .map(|p| p.title())
-            .unwrap_or("    select");
+            .unwrap_or("select");
         ui.spacing_mut().interact_size.y = 40.0;
 
         self.set_dropdown_rounding(ui);

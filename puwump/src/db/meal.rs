@@ -97,12 +97,12 @@ impl Db {
 
     /// Add an ingredient to a meal
     /// Amount is amount in grams
-    pub fn insert_meal_ingredient(&self, meal_name: &str, ingredient_id: Uuid, amount: u32) -> Result<()> {
+    pub fn insert_meal_ingredient(&self, meal_id: Uuid, ingredient_id: Uuid, amount: u32) -> Result<()> {
         let id = Uuid::new_v4();
         self.con
             .execute(
-                "INSERT INTO ingredient_in_meal (id, amount_gr, meal_name, ingredient_id) VALUES (?1, ?2, ?3, ?4)",
-                (id.to_string(), amount, meal_name, ingredient_id.to_string()),
+                "INSERT INTO ingredient_in_meal (id, amount_gr, meal_id, ingredient_id) VALUES (?1, ?2, ?3, ?4)",
+                (id.to_string(), amount, meal_id.to_string(), ingredient_id.to_string()),
             )
             .map_err(Self::map_sqlite_err)?;
         Ok(())
@@ -112,8 +112,10 @@ impl Db {
     /// Name is unique
     pub fn insert_meal(&self, name: &str, description: &str, calories: u32) -> Result<()> {
         let id = Uuid::new_v4();
-        self.con
-            .execute("INSERT INTO meal (id, name, description, calories) VALUES (?1, ?2, ?3, ?4)", (id.to_string(), name, description, calories))?;
+        self.con.execute(
+            "INSERT INTO meal (id, name, description, calories) VALUES (?1, ?2, ?3, ?4)",
+            (id.to_string(), name, description, calories),
+        )?;
         Ok(())
     }
 
@@ -161,17 +163,35 @@ impl Db {
 
     /// Returns a Vec with all ingredients in a recipe  
     /// Returns an object containing the ingredient and the amount in grams
-    pub fn get_meal_ingredients(&self, meal_name: &str) -> Result<Vec<MealIngredientDetail>> {
+    pub fn get_meal_ingredients(&self, meal_id: Uuid) -> Result<Vec<MealIngredientDetail>> {
         let mut stmt = self.con.prepare(
-            "SELECT i.name, i.id, im.amount_gr
-        FROM ingredient_in_meal im
-        JOIN ingredient i ON i.id = im.ingredient_id
-        WHERE im.meal_name = ?1",
+            "SELECT im.id, i.id, i.name, im.amount_gr
+     FROM ingredient_in_meal im
+     JOIN ingredient i ON i.id = im.ingredient_id
+     WHERE im.meal_id = ?1",
         )?;
         let ingredients = stmt
-            .query_map((meal_name,), <MealIngredientDetail as Model>::from_row)?
+            .query_map((meal_id.to_string(),), <MealIngredientDetail as Model>::from_row)?
             .collect::<rusqlite::Result<Vec<MealIngredientDetail>>>()
             .map_err(|_| PuwumpError::RowNotFound)?;
         Ok(ingredients)
+    }
+
+    pub fn incr_meal_ingredient(&self, id: Uuid, incr: u16) -> Result<()> {
+        self.con
+            .execute("UPDATE ingredient_in_meal SET amount_gr = amount_gr + ?2 WHERE id = ?1", (id.to_string(), incr))?;
+        Ok(())
+    }
+
+    pub fn decr_meal_ingredient(&self, id: Uuid, decr: u16) -> Result<()> {
+        self.con
+            .execute("UPDATE ingredient_in_meal SET amount_gr = MAX(amount_gr - ?2, 0) WHERE id = ?1", (id.to_string(), decr))?;
+        Ok(())
+    }
+
+    pub fn remove_meal_ingredient(&self, id: Uuid) -> Result<()> {
+        self.con
+            .execute("DELETE FROM ingredient_in_meal WHERE id = ?1", (id.to_string(),))?;
+        Ok(())
     }
 }

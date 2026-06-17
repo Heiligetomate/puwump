@@ -12,7 +12,7 @@ pub struct Ingredient {
     pub name: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Meal {
     pub id: Uuid,
     pub name: String,
@@ -51,15 +51,17 @@ impl Model for Meal {
 
 impl Model for MealIngredientDetail {
     fn from_row(row: &rusqlite::Row) -> rusqlite::Result<Self> {
-        let ing_id: String = row.get(1)?;
         let id: String = row.get(0)?;
+        let ing_id: String = row.get(1)?;
+        let ing_name: String = row.get(2)?;
+
         Ok(Self {
             id: Uuid::parse_str(&id).map_err(|_| rusqlite::Error::InvalidQuery)?,
             ingredient: Ingredient {
-                name: row.get(0)?,
+                name: ing_name,
                 id: Uuid::parse_str(&ing_id).map_err(|_| rusqlite::Error::InvalidQuery)?,
             },
-            amount_gr: row.get(2)?,
+            amount_gr: row.get(3)?,
         })
     }
 }
@@ -135,5 +137,19 @@ impl CardCrud for Meal {
 
     fn get_all(db: &Db) -> Result<Vec<Self>> {
         db.get_all_meals()
+    }
+}
+
+impl CardAdd for MealIngredientDetail {
+    fn key(&self) -> Uuid {
+        self.id
+    }
+
+    fn body(&self) -> Option<&str> {
+        None
+    }
+
+    fn title(&self) -> &str {
+        &self.ingredient.name
     }
 }
