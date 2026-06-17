@@ -21,6 +21,7 @@ impl Db {
 
     /// Get an ingredient by its name
     /// Just useful for mapping and checking if the ingredient exists
+    #[allow(unused)]
     pub fn get_ingredient(&self, id: Uuid) -> Result<Ingredient> {
         let stmt = self
             .con
@@ -39,6 +40,7 @@ impl Db {
 
     /// Returns a Vec with all ingredient names
     /// Ordered by name, case-insensitive
+    #[allow(unused)]
     pub fn get_all_ingredient_names(&self) -> Result<Vec<String>> {
         let mut stmt = self
             .con
@@ -52,6 +54,7 @@ impl Db {
 
     /// Returns a Vec with all ingredient ids
     /// Ordered by name, case-insensitive
+    #[allow(unused)]
     pub fn get_all_ingredient_ids(&self) -> Result<Vec<Uuid>> {
         let mut stmt = self
             .con

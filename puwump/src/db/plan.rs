@@ -51,6 +51,7 @@ impl Db {
     }
 
     /// Get all Plan Uuids
+    #[allow(unused)]
     pub fn get_all_plan_ids(&self) -> Result<Vec<Uuid>> {
         let stmt = self
             .con
