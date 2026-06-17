@@ -42,42 +42,42 @@ pub struct ButtonTheme {
 }
 
 impl ButtonTheme {
-    pub fn delete() -> Self {
+    pub const fn delete() -> Self {
         Self {
             color: Color32::from_rgb(204, 36, 29),
             symbol: 'X',
         }
     }
 
-    pub fn add() -> Self {
+    pub const fn add() -> Self {
         Self {
             color: Color32::from_rgb(184, 187, 38),
             symbol: 'O',
         }
     }
 
-    pub fn minus() -> Self {
+    pub const fn minus() -> Self {
         Self {
             color: Color32::from_rgb(204, 36, 29),
             symbol: '-',
         }
     }
 
-    pub fn plus() -> Self {
+    pub const fn plus() -> Self {
         Self {
             color: Color32::from_rgb(184, 187, 38),
             symbol: '+',
         }
     }
 
-    pub fn move_up() -> Self {
+    pub const fn move_up() -> Self {
         Self {
             color: Color32::from_rgb(69, 133, 136),
             symbol: '^',
         }
     }
 
-    pub fn move_down() -> Self {
+    pub const fn move_down() -> Self {
         Self {
             color: Color32::from_rgb(69, 133, 136),
             symbol: 'v',
