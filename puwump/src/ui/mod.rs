@@ -5,3 +5,5 @@ mod manage_view;
 mod sizes;
 mod theme;
 mod util;
+
+pub use theme::ButtonTheme;

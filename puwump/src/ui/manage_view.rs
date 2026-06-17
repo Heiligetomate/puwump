@@ -34,44 +34,11 @@ impl PuwumpUi {
 
                 ui.add_space(margin);
                 let exercises = { if let Ok(exs) = handler.get_sel_data() { exs } else { return } };
-                let results = self.add_list(
-                    ui,
-                    left_width,
-                    list_height,
-                    inner_margin,
-                    exercises,
-                    &[ButtonTheme::delete(), ButtonTheme::move_up(), ButtonTheme::move_down(), ButtonTheme::plus(), ButtonTheme::minus()],
-                );
-                for (id, clicked) in results {
-                    if clicked[0] {
-                        self.db
-                            .remove_plan_exercise(id)
-                            .unwrap();
-                        handler
-                            .updated_sel_data(&self.db)
-                            .unwrap();
-                    } else if clicked[1] {
-                        let _ = self.db.move_plan_exercise(id, -1);
-                        handler
-                            .updated_sel_data(&self.db)
-                            .unwrap();
-                    } else if clicked[2] {
-                        let _ = self.db.move_plan_exercise(id, 1);
-                        handler
-                            .updated_sel_data(&self.db)
-                            .unwrap();
-                    } else if clicked[3] {
-                        self.db.incr_plan_exercise(id).unwrap();
-                        handler
-                            .updated_sel_data(&self.db)
-                            .unwrap();
-                    } else if clicked[4] {
-                        self.db.decr_plan_exercise(id).unwrap();
-                        handler
-                            .updated_sel_data(&self.db)
-                            .unwrap();
-                    }
-                }
+                let results = self.add_list(ui, left_width, list_height, inner_margin, exercises, H::card_buttons());
+
+                handler
+                    .handle_buttons(results, &self.db)
+                    .unwrap();
             });
 
             ui.add_space(margin);
@@ -81,18 +48,15 @@ impl PuwumpUi {
             // TODO not plan
             for (id, clicked) in self.add_list(ui, list_width, available_height, inner_margin, &self.exercise_hndl.data, &[ButtonTheme::add()]) {
                 if clicked[0] {
-                    if let Some(plan_id) = handler
-                        .get_selected()
-                        .as_ref()
-                        .map(|p| p.key())
+                    if handler
+                        .insert_handler_model(&self.db, id)
+                        .is_ok()
                     {
-                        self.db
-                            .insert_plan_exercise(plan_id, id, 1)
+                        println!("inserted");
+                        handler
+                            .updated_sel_data(&self.db)
                             .unwrap();
-                        self.edit_plan_hndl
-                            .update(&self.db)
-                            .unwrap();
-                    }
+                    };
                 }
             }
         });
