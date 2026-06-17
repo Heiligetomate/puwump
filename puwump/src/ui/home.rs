@@ -27,12 +27,11 @@ impl PuwumpUi {
                         .get_all_exercises()
                         .unwrap_or_default();
                 }
-
-                if self.button(ui, button_width, button_height, self.theme.blue, "Add Meal") {
-                    self.view = View::AddMeal;
-                    self.meal_hndl.data = self
+                if self.button(ui, button_width, button_height, self.theme.blue, "Add Ingredient") {
+                    self.view = View::AddIngredient;
+                    self.ingredient_hdnl.data = self
                         .db
-                        .get_all_meals()
+                        .get_all_ingredients()
                         .unwrap_or_default();
                 }
             });
@@ -41,20 +40,19 @@ impl PuwumpUi {
 
             ui.horizontal(|ui| {
                 ui.add_space(self.sizes.margin);
-
-                if self.button(ui, button_width, button_height, self.theme.blue, "Add Ingredient") {
-                    self.view = View::AddIngredient;
-                    self.ingredient_hdnl.data = self
-                        .db
-                        .get_all_ingredients()
-                        .unwrap_or_default();
-                }
-
                 if self.button(ui, button_width, button_height, self.theme.blue, "Add Plan") {
                     self.view = View::AddPlan;
                     self.edit_plan_hndl.data = self
                         .db
                         .get_all_plans()
+                        .unwrap_or_default();
+                }
+
+                if self.button(ui, button_width, button_height, self.theme.blue, "Add Meal") {
+                    self.view = View::AddMeal;
+                    self.meal_hndl.data = self
+                        .db
+                        .get_all_meals()
                         .unwrap_or_default();
                 }
             });
