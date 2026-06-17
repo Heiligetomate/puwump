@@ -6,7 +6,7 @@ mod ui;
 mod util;
 mod values;
 
-use crate::{db::Db, errors::Result, ui::core::PuwumpUi};
+use crate::{db::Db, errors::Result, ui::PuwumpUi};
 use values::*;
 
 #[allow(unused)]
