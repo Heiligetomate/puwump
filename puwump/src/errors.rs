@@ -5,7 +5,6 @@ pub type Result<T> = std::result::Result<T, PuwumpError>;
 #[derive(Debug, Clone)]
 pub enum PuwumpError {
     SelectedDataNotFound,
-    PlanNotFound,
     HomeNotFound,
     Ui(String),
     Rusqlite(String),
@@ -23,7 +22,6 @@ impl Display for PuwumpError {
         match self {
             Self::SelectedDataNotFound => write!(f, "selected data in handler not found"),
             Self::InputFieldIntParse(e) => write!(f, "{e}"),
-            Self::PlanNotFound => write!(f, "plan was not found"),
             Self::Ui(e) => write!(f, "Ui error: {e}"),
             Self::Rusqlite(e) => write!(f, "rusqlite error: {e}"),
             Self::HomeNotFound => write!(f, "Home env not found"),

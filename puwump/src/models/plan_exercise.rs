@@ -6,6 +6,7 @@ use crate::models::{CardAdd, Exercise, core::Model};
 pub struct PlanExerciseDetail {
     pub id: Uuid,
     pub exercise: Exercise,
+    #[allow(unused)]
     pub order_index: u16,
     pub reps: u16,
     pub title: String,
