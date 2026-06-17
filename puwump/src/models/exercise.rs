@@ -3,11 +3,7 @@ use uuid::Uuid;
 use crate::{
     db::Db,
     errors::Result,
-    models::{
-        CardAdd,
-        card::{CardCrud, InputField},
-        core::Model,
-    },
+    models::{CardAdd, InputField, card::CardCrud, core::Model},
 };
 
 #[derive(Debug)]

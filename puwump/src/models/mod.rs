@@ -2,6 +2,7 @@ mod card;
 mod core;
 mod exercise;
 mod food;
+mod inputs;
 mod plan;
 mod plan_exercise;
 
@@ -12,5 +13,6 @@ pub use exercise::Exercise;
 pub use food::Ingredient;
 pub use food::Meal;
 pub use food::MealIngredientDetail;
+pub use inputs::*;
 pub use plan::Plan;
 pub use plan_exercise::PlanExerciseDetail;
