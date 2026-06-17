@@ -1,9 +1,13 @@
 use egui::{Button, Color32, Margin, Rect, RichText, Stroke, Ui};
+use uuid::Uuid;
 
-use crate::ui::{
-    core::{PuwumpUi, View},
-    sizes::SizeSheet,
-    theme::{ButtonTheme, Theme},
+use crate::{
+    models::CardAdd,
+    ui::{
+        core::{PuwumpUi, View},
+        sizes::SizeSheet,
+        theme::{ButtonTheme, Theme},
+    },
 };
 
 impl PuwumpUi {
@@ -28,6 +32,7 @@ impl PuwumpUi {
 
     pub fn get_title(&self) -> &str {
         match self.view {
+            View::EatMeal => "Eat Meal",
             View::AddMeal => "Add Meal",
             View::EditPlan => "Edit Plan",
             View::AddExercise => "Add Exercise",
@@ -88,6 +93,62 @@ impl PuwumpUi {
             .collect();
         ui.painter()
             .add(egui::Shape::line(points, egui::Stroke::new(4.0, color)));
+    }
+
+    /// Generic styled dropdown
+    /// Returns uuid key of the selected item
+    pub fn styled_dropdown<C: CardAdd>(&self, ui: &mut Ui, id_salt: &str, width: f32, items: &[C], selected_key: Option<Uuid>, placeholder: &str) -> Option<Uuid> {
+        let selected_text = items
+            .iter()
+            .find(|i| Some(i.key()) == selected_key)
+            .map(|i| i.title())
+            .unwrap_or(placeholder);
+
+        let orig = ui.spacing().interact_size.y;
+        ui.spacing_mut().interact_size.y = 40.0;
+        self.set_dropdown_rounding(ui);
+
+        let mut new_selected = selected_key;
+
+        egui::ComboBox::from_id_salt(id_salt)
+            .selected_text(
+                RichText::new(selected_text)
+                    .color(self.theme.fg)
+                    .size(16.0),
+            )
+            .width(width)
+            .show_ui(ui, |ui| {
+                ui.style_mut()
+                    .visuals
+                    .widgets
+                    .inactive
+                    .bg_fill = self.theme.text_field;
+                ui.style_mut()
+                    .visuals
+                    .widgets
+                    .hovered
+                    .bg_fill = self.theme.header_bg;
+
+                for item in items {
+                    let is_selected = new_selected == Some(item.key());
+                    if ui
+                        .selectable_label(
+                            is_selected,
+                            RichText::new(item.title())
+                                .color(self.theme.fg)
+                                .size(20.0),
+                        )
+                        .clicked()
+                    {
+                        new_selected = Some(item.key());
+                    }
+                }
+            });
+
+        self.reset_dropdown_rounding(ui);
+        ui.spacing_mut().interact_size.y = orig;
+
+        if new_selected != selected_key { new_selected } else { None }
     }
 }
 

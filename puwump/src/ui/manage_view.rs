@@ -1,5 +1,4 @@
-use egui::{RichText, Ui};
-use uuid::Uuid;
+use egui::Ui;
 
 use crate::{
     handlers::EditHandler,
@@ -63,75 +62,20 @@ impl PuwumpUi {
     }
 
     pub fn plan_drop_down<H: EditHandler>(&mut self, ui: &mut Ui, width: f32, handler: &mut H) {
-        let selected_text = handler
-            .get_selected()
-            .map(|p| p.title())
-            .unwrap_or("select");
-        ui.spacing_mut().interact_size.y = 40.0;
+        handler.update(&self.db).unwrap();
 
-        self.set_dropdown_rounding(ui);
+        let before = handler.get_selected().map(|p| p.key());
+        let data = handler.get_data();
 
-        egui::ComboBox::from_id_salt("selector")
-            .selected_text(
-                RichText::new(selected_text)
-                    .color(self.theme.fg)
-                    .size(16.0),
-            )
-            .width(width)
-            .show_ui(ui, |ui| {
-                ui.style_mut()
-                    .visuals
-                    .widgets
-                    .inactive
-                    .bg_fill = self.theme.text_field;
-                ui.style_mut()
-                    .visuals
-                    .widgets
-                    .hovered
-                    .bg_fill = self.theme.header_bg;
-
-                handler.update(&self.db).unwrap();
-
-                let data = handler.get_data();
-                let before = handler.get_selected().map(|p| p.key());
-                let mut new_selected = handler.get_selected().map(|p| p.key());
-
-                for entry in data.iter() {
-                    let is_selected = new_selected == Some(entry.key());
-                    if ui
-                        .selectable_label(
-                            is_selected,
-                            RichText::new(entry.title())
-                                .color(self.theme.fg)
-                                .size(20.0),
-                        )
-                        .clicked()
-                    {
-                        new_selected = Some(entry.key());
-                    }
-                }
-
-                if new_selected != before {
-                    if let Some(id) = new_selected {
-                        handler
-                            .update_sel(&self.db, id)
-                            .unwrap();
-                    }
-                }
-                let after: Option<Uuid> = handler
-                    .get_selected()
-                    .as_ref()
-                    .map(|p| p.key());
-
-                if before != after {
-                    handler
-                        .updated_sel_data(&self.db)
-                        .unwrap();
-                }
-            });
-        self.reset_dropdown_rounding(ui);
+        if let Some(id) = self.styled_dropdown(ui, "selector", width, &data, before, "select") {
+            handler
+                .update_sel(&self.db, id)
+                .unwrap();
+            handler
+                .updated_sel_data(&self.db)
+                .unwrap();
+        }
     }
-
     /// This function sets the correct rounding / styling for drop downs
     /// The reset_dropdown_rounding function should be called after the drop down was created
     pub fn set_dropdown_rounding(&self, ui: &mut Ui) {

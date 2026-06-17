@@ -1,5 +1,6 @@
 mod add_view;
 mod core;
+mod eat_view;
 mod home;
 mod manage_view;
 mod sizes;

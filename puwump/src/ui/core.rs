@@ -4,7 +4,7 @@ use egui::{Align2, Button, FontId, Rect, RichText, Ui, UiBuilder};
 use crate::{
     db::Db,
     errors::Result,
-    handlers::{AddTaskHandler, MealEditHandler, PlanEditHandler, WorkoutHandler},
+    handlers::{AddTaskHandler, EatHandler, MealEditHandler, PlanEditHandler, WorkoutHandler},
     models::{Exercise, ExerciseInputs, Ingredient, IngredientInputs, Meal, MealInputs, Plan, PlanInputs},
     ui::{sizes::SizeSheet, theme::Theme},
 };
@@ -18,6 +18,7 @@ pub enum View {
     EditPlan,
     EditMeal,
     Workout,
+    EatMeal,
 }
 
 pub struct PuwumpUi {
@@ -31,6 +32,7 @@ pub struct PuwumpUi {
     pub edit_plan_hndl: PlanEditHandler,
     pub edit_meal_hndl: MealEditHandler,
     pub workout_hndl: WorkoutHandler,
+    pub eat_hndl: EatHandler,
     pub db: Db,
 }
 
@@ -48,6 +50,7 @@ impl PuwumpUi {
             edit_plan_hndl: PlanEditHandler::new(&db)?,
             edit_meal_hndl: MealEditHandler::new(&db)?,
             workout_hndl: WorkoutHandler::default(),
+            eat_hndl: EatHandler::default(),
             db,
         })
     }
@@ -78,6 +81,7 @@ impl eframe::App for PuwumpUi {
             View::AddPlan => self.add_plan_view(ui),
             View::AddMeal => self.add_meal_view(ui),
             View::EditMeal => self.edit_meal_view(ui),
+            View::EatMeal => self.eat_view(ui),
         });
     }
 }
