@@ -12,7 +12,6 @@ pub trait EditHandler {
 
     fn get_selected(&self) -> Option<&Self::Model>;
     fn get_sel_data(&self) -> Result<&Vec<Self::SelModel>>;
-    fn set_selected(&mut self, model: Option<Self::Model>);
     fn get_data(&self) -> &Vec<Self::Model>;
     fn update(&mut self, db: &Db) -> Result<()>;
     fn update_sel(&mut self, db: &Db, id: Uuid) -> Result<()>;

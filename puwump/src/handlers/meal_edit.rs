@@ -116,8 +116,4 @@ impl EditHandler for MealEditHandler {
 
         Err(PuwumpError::SelectedDataNotFound)
     }
-
-    fn set_selected(&mut self, model: Option<Self::Model>) {
-        self.selected = model;
-    }
 }
