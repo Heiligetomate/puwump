@@ -5,8 +5,8 @@ mod home;
 mod manage_view;
 mod sizes;
 mod theme;
-mod timer_view;
 mod util;
+mod workout_view;
 
 pub use core::PuwumpUi;
 pub use theme::ButtonTheme;
