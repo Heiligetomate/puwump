@@ -27,12 +27,30 @@ fn generate_plan_examples(db: &Db) -> Result<()> {
     Ok(())
 }
 
+#[allow(unused)]
+fn generate_ingredient_examples(db: &Db) -> Result<()> {
+    for name in INGREDIENT_EXAMPLE_VALUES {
+        db.insert_ingredient(name)?;
+    }
+
+    Ok(())
+}
+
+#[allow(unused)]
+fn generate_meal_examples(db: &Db) -> Result<()> {
+    for (name, calories, description) in MEAL_EXAMPLE_VALUES {
+        db.insert_meal(name, description, calories)?;
+    }
+
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let db = &Db::init()?.reset()?;
     generate_plan_examples(&db)?;
     generate_exercise_examples(&db)?;
-    db.insert_plan_exercise(db.get_all_plans()?[0].id, db.get_all_exercises()?[0].id, 3)?;
-    db.insert_plan_exercise(db.get_all_plans()?[0].id, db.get_all_exercises()?[1].id, 3)?;
+    generate_ingredient_examples(&db)?;
+    generate_meal_examples(&db)?;
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),

@@ -46,3 +46,51 @@ pub static PLAN_EXAMPLE_VALUES: [(&str, &str, u16); 20] = [ // Very sloppy value
     ("Evening Wind Down", "Gentle stretching and relaxation exercises to help you unwind before bed.", 15),
     ("Athletic Performance", "A mixed training session focused on power, agility, coordination, and conditioning.", 70),
 ];
+
+#[rustfmt::skip]
+pub static INGREDIENT_EXAMPLE_VALUES: [&str; 20] = [
+    "Chicken Breast",
+    "Rice",
+    "Broccoli",
+    "Egg",
+    "Oats",
+    "Banana",
+    "Milk",
+    "Greek Yogurt",
+    "Salmon",
+    "Sweet Potato",
+    "Avocado",
+    "Spinach",
+    "Tomato",
+    "Cheddar Cheese",
+    "Olive Oil",
+    "Peanut Butter",
+    "Whole Wheat Bread",
+    "Black Beans",
+    "Almonds",
+    "Apple",
+];
+
+#[rustfmt::skip]
+pub static MEAL_EXAMPLE_VALUES: [(&str, u32, &str); 20] = [
+    ("Grilled Chicken & Rice", 550, "Lean grilled chicken breast served with steamed rice and broccoli."),
+    ("Protein Oatmeal", 420, "Oats cooked with milk and topped with banana and peanut butter."),
+    ("Greek Yogurt Bowl", 350, "Greek yogurt with sliced banana, almonds, and honey."),
+    ("Salmon & Sweet Potato", 680, "Baked salmon served with roasted sweet potato and spinach."),
+    ("Chicken Salad", 480, "Chicken breast mixed with spinach, tomato, avocado, and olive oil dressing."),
+    ("Egg Breakfast Plate", 450, "Scrambled eggs served with whole wheat toast and sliced tomato."),
+    ("Peanut Butter Toast", 320, "Whole wheat bread topped with peanut butter and banana slices."),
+    ("Bean & Rice Bowl", 520, "Black beans, rice, tomato, and avocado in a hearty bowl."),
+    ("Cheese Omelette", 400, "Three-egg omelette with cheddar cheese and spinach."),
+    ("Apple & Yogurt Snack", 250, "Greek yogurt served with sliced apple and cinnamon."),
+    ("Chicken Stir Fry", 610, "Chicken breast stir-fried with broccoli and served over rice."),
+    ("Salmon Salad", 570, "Flaked salmon over spinach, tomato, and avocado."),
+    ("Power Breakfast", 530, "Eggs, oatmeal, banana, and milk for a balanced start."),
+    ("Protein Smoothie", 300, "Milk blended with banana, Greek yogurt, and peanut butter."),
+    ("Vegetarian Rice Bowl", 500, "Rice, black beans, broccoli, tomato, and avocado."),
+    ("Almond Oat Snack", 280, "Oats mixed with almonds and milk for a quick snack."),
+    ("Chicken Sandwich", 540, "Grilled chicken breast on whole wheat bread with tomato and spinach."),
+    ("Loaded Sweet Potato", 460, "Baked sweet potato topped with black beans and cheddar cheese."),
+    ("Avocado Toast & Eggs", 490, "Whole wheat toast with avocado and two fried eggs."),
+    ("Post Workout Meal", 700, "Chicken breast, rice, broccoli, and a side of Greek yogurt."),
+];
