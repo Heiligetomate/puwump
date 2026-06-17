@@ -25,11 +25,6 @@ impl PuwumpUi {
         .clicked()
     }
 
-    pub fn button_full_width(&mut self, ui: &mut Ui, button_height: f32, color: Color32, title: &str) -> bool {
-        let available_width = ui.available_width() - self.sizes.margin * 2.0;
-        self.button(ui, available_width, button_height, color, title)
-    }
-
     pub fn get_title(&self) -> &str {
         match self.view {
             View::EatMeal => "Eat Meal",
@@ -57,10 +52,11 @@ impl PuwumpUi {
             .bg_stroke = Stroke::NONE;
     }
 
-    pub fn calc_button_height(&self, ui: &Ui, cnt: u8) -> f32 {
+    pub fn calc_button_height(&self, ui: &Ui, rows: u8) -> f32 {
         let height = ui.available_height();
         let spacing = self.spacing(ui);
-        (height - self.sizes.margin * 2.0 - spacing * (cnt - 1) as f32) / cnt as f32
+
+        (height - self.sizes.margin * 2.0 - spacing * (rows - 1) as f32) / rows as f32
     }
 
     pub fn spacing(&self, ui: &Ui) -> f32 {

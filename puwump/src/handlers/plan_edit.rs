@@ -12,7 +12,7 @@ use crate::{
 pub struct PlanEditHandler {
     selectable: Vec<Exercise>,
     selected: Option<Plan>,
-    data: Vec<Plan>,
+    pub data: Vec<Plan>,
     sel_data: Option<Vec<PlanExerciseDetail>>,
 }
 
