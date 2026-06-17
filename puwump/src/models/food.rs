@@ -1,7 +1,7 @@
 use crate::{
     db::Db,
     errors::{PuwumpError, Result},
-    models::{CardAdd, card_compatible::CardCrud, core::Model},
+    models::{CardAdd, CardCrud, InputField, core::Model},
 };
 
 use uuid::Uuid;
@@ -85,7 +85,7 @@ impl CardCrud for Ingredient {
         db.get_all_ingredients()
     }
 
-    fn insert(db: &Db, values: &[super::card_compatible::InputField]) -> Result<()> {
+    fn insert(db: &Db, values: &[InputField]) -> Result<()> {
         let name = values[0].value.as_str();
         db.insert_ingredient(name)?;
 
@@ -120,7 +120,7 @@ impl CardCrud for Meal {
         "meal"
     }
 
-    fn insert(db: &Db, values: &[super::card_compatible::InputField]) -> Result<()> {
+    fn insert(db: &Db, values: &[InputField]) -> Result<()> {
         db.insert_meal(
             &values[0].value,
             &values[1].value,

@@ -6,10 +6,7 @@ use uuid::Uuid;
 use crate::{
     db::Db,
     errors::{PuwumpError, Result},
-    models::{
-        Plan, PlanExerciseDetail,
-        core::{Model, statement_to_model},
-    },
+    models::{Model, Plan, PlanExerciseDetail, statement_to_model},
     util::ids_from_statement,
 };
 
@@ -18,8 +15,10 @@ impl Db {
     /// Plan names are not unique
     pub fn insert_plan(&self, name: &str, description: &str, est_min: u16) -> Result<Uuid> {
         let id = Uuid::new_v4();
-        self.con
-            .execute("INSERT INTO plan (id, name, description, est_mins)  VALUES (?1, ?2, ?3, ?4)", params![id.to_string(), name, description, est_min])?;
+        self.con.execute(
+            "INSERT INTO plan (id, name, description, est_mins)  VALUES (?1, ?2, ?3, ?4)",
+            params![id.to_string(), name, description, est_min],
+        )?;
 
         Ok(id)
     }
@@ -93,13 +92,17 @@ impl Db {
     pub fn remove_plan_exercise(&self, id: Uuid) -> Result<()> {
         let (plan_id, order_index): (String, i16) = self
             .con
-            .query_row("SELECT plan_id, order_index FROM plan_exercise WHERE id = ?1", params![id.to_string()], |row| Ok((row.get(0)?, row.get(1)?)))?;
+            .query_row("SELECT plan_id, order_index FROM plan_exercise WHERE id = ?1", params![id.to_string()], |row| {
+                Ok((row.get(0)?, row.get(1)?))
+            })?;
 
         self.con
             .execute("DELETE FROM plan_exercise WHERE id = ?1", params![id.to_string()])?;
 
-        self.con
-            .execute("UPDATE plan_exercise SET order_index = order_index - 1 WHERE plan_id = ?1 AND order_index > ?2", params![plan_id, order_index])?;
+        self.con.execute(
+            "UPDATE plan_exercise SET order_index = order_index - 1 WHERE plan_id = ?1 AND order_index > ?2",
+            params![plan_id, order_index],
+        )?;
 
         Ok(())
     }
@@ -107,7 +110,9 @@ impl Db {
     pub fn move_plan_exercise(&self, id: Uuid, diff: i8) -> Result<()> {
         let (plan_id, current): (String, i16) = self
             .con
-            .query_row("SELECT plan_id, order_index FROM plan_exercise WHERE id = ?1", params![id.to_string()], |row| Ok((row.get(0)?, row.get(1)?)))?;
+            .query_row("SELECT plan_id, order_index FROM plan_exercise WHERE id = ?1", params![id.to_string()], |row| {
+                Ok((row.get(0)?, row.get(1)?))
+            })?;
 
         let target = current + diff as i16;
         if target < 0 {

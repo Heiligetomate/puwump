@@ -2,11 +2,7 @@ use uuid::Uuid;
 
 use crate::{
     errors::PuwumpError,
-    models::{
-        CardAdd,
-        card_compatible::{CardCrud, InputField},
-        core::Model,
-    },
+    models::{CardAdd, CardCrud, InputField, core::Model},
 };
 
 #[derive(Debug, Clone, PartialEq)]

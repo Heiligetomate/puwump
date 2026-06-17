@@ -5,10 +5,7 @@ use uuid::Uuid;
 use crate::{
     db::Db,
     errors::{PuwumpError, Result},
-    models::{
-        Ingredient, Meal, MealIngredientDetail,
-        core::{Model, statement_to_model},
-    },
+    models::{Ingredient, Meal, MealIngredientDetail, Model, statement_to_model},
 };
 
 impl Db {

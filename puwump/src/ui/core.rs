@@ -4,10 +4,8 @@ use egui::{Align2, Button, FontId, Rect, RichText, Ui, UiBuilder};
 use crate::{
     db::Db,
     errors::Result,
-    models::{
-        AddTaskHandler, Exercise, Ingredient, Meal, MealEditHandler, Plan, PlanEditHandler, WorkoutHandler,
-        card_compatible::{ExerciseInputs, IngredientInputs, MealInputs, PlanInputs},
-    },
+    handlers::{AddTaskHandler, MealEditHandler, PlanEditHandler, WorkoutHandler},
+    models::{Exercise, ExerciseInputs, Ingredient, IngredientInputs, Meal, MealInputs, Plan, PlanInputs},
     ui::{sizes::SizeSheet, theme::Theme},
 };
 

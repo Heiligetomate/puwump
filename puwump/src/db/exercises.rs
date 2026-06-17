@@ -4,7 +4,7 @@ use uuid::Uuid;
 use crate::{
     db::Db,
     errors::Result,
-    models::{Exercise, core::statement_to_model},
+    models::{Exercise, statement_to_model},
     util::ids_from_statement,
 };
 

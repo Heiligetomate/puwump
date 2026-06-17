@@ -5,7 +5,7 @@ use crate::{
     errors::Result,
     models::{
         CardAdd,
-        card_compatible::{CardCrud, InputField},
+        card::{CardCrud, InputField},
         core::Model,
     },
 };

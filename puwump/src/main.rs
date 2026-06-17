@@ -1,5 +1,6 @@
 pub mod db;
 pub mod errors;
+pub mod handlers;
 pub mod models;
 mod ui;
 pub mod util;

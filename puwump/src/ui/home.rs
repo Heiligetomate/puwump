@@ -1,7 +1,7 @@
 use egui::Ui;
 
 use crate::{
-    models::EditHandler,
+    handlers::EditHandler,
     ui::core::{PuwumpUi, View},
 };
 

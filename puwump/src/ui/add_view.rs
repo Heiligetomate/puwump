@@ -3,17 +3,18 @@ use uuid::Uuid;
 
 use crate::{
     errors::PuwumpError,
-    models::{
-        AddTaskHandler, CardAdd,
-        card_compatible::{CardCrud, CardInputs},
-        core::Model,
-    },
+    handlers::AddTaskHandler,
+    models::{CardAdd, CardCrud, CardInputs, Model},
     ui::{core::PuwumpUi, theme::ButtonTheme, util::text_field},
 };
 
 impl PuwumpUi {
     /// Generates the full view
-    pub fn add_view<A: CardCrud, I: CardInputs>(&mut self, ui: &mut Ui, task_handler: &mut AddTaskHandler<A, I>) {
+    pub fn add_view<A, I>(&mut self, ui: &mut Ui, task_handler: &mut AddTaskHandler<A, I>)
+    where
+        A: CardCrud,
+        I: CardInputs,
+    {
         let width = self.sizes.width;
         let height = self.sizes.height;
         let margin = self.sizes.margin;

@@ -1,8 +1,4 @@
-use crate::models::{
-    CardAdd, Exercise, Ingredient, Meal, Plan,
-    card_compatible::{CardInputs, ExerciseInputs, IngredientInputs, MealInputs, PlanInputs},
-    core::Model,
-};
+use crate::models::{CardAdd, CardInputs, Exercise, ExerciseInputs, Ingredient, IngredientInputs, Meal, MealInputs, Model, Plan, PlanInputs};
 
 pub struct AddTaskHandler<A: Model + CardAdd, I: CardInputs> {
     pub input_fields: I,

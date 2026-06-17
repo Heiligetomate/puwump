@@ -1,7 +1,8 @@
 use egui::{Align2, FontId, Label, RichText, Ui};
 
 use crate::{
-    models::{CardAdd, Phase, PlanExerciseDetail, WorkoutHandler},
+    handlers::{Phase, WorkoutHandler},
+    models::{CardAdd, PlanExerciseDetail},
     ui::core::PuwumpUi,
 };
 

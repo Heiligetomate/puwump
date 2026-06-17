@@ -2,7 +2,8 @@ use egui::{RichText, Ui};
 use uuid::Uuid;
 
 use crate::{
-    models::{CardAdd, EditHandler},
+    handlers::EditHandler,
+    models::CardAdd,
     ui::{core::PuwumpUi, theme::ButtonTheme},
 };
 
