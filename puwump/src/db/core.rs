@@ -7,7 +7,6 @@ use crate::{
     util::{create_dirs_to_path, get_full_db_path},
 };
 
-pub const DB_LOCATION: &str = "~/.local/share/puwump/puwump.db";
 const SQL_INIT: &str = include_str!("../../../init.sql");
 
 pub struct Db {

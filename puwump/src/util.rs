@@ -3,21 +3,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use directories::ProjectDirs;
 use rusqlite::Statement;
 use uuid::Uuid;
 
-use crate::{
-    db::DB_LOCATION,
-    errors::{PuwumpError, Result},
-};
-
-pub fn get_home_dir() -> Result<String> {
-    std::env::var("HOME").map_err(|_| PuwumpError::HomeNotFound)
-}
+use crate::errors::{PuwumpError, Result};
 
 pub fn get_full_db_path() -> Result<PathBuf> {
-    let raw = DB_LOCATION.replacen("~", &get_home_dir()?, 1);
-    Ok(PathBuf::from(raw))
+    let proj_dirs = ProjectDirs::from("com", "yourname", "puwump").ok_or(PuwumpError::HomeNotFound)?;
+
+    Ok(proj_dirs.data_dir().join("puwump.db"))
 }
 
 pub fn create_dirs_to_path(path: &Path) -> Result<()> {
