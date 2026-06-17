@@ -24,6 +24,7 @@ pub struct Meal {
 pub struct MealIngredientDetail {
     pub id: Uuid,
     pub ingredient: Ingredient,
+    #[allow(unused)]
     pub amount_gr: u32,
 }
 
