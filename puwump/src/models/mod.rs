@@ -6,6 +6,7 @@ mod food;
 pub mod plan;
 mod plan_exercise;
 mod task_handler;
+mod workout_handler;
 
 pub use card_compatible::CardAdd;
 pub use edit_handler::EditHandler;
@@ -18,3 +19,5 @@ pub use food::MealIngredientDetail;
 pub use plan::Plan;
 pub use plan_exercise::PlanExerciseDetail;
 pub use task_handler::AddTaskHandler;
+pub use workout_handler::Phase;
+pub use workout_handler::WorkoutHandler;

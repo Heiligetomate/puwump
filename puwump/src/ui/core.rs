@@ -5,7 +5,7 @@ use crate::{
     db::Db,
     errors::Result,
     models::{
-        AddTaskHandler, Exercise, Ingredient, Meal, MealEditHandler, Plan, PlanEditHandler,
+        AddTaskHandler, Exercise, Ingredient, Meal, MealEditHandler, Plan, PlanEditHandler, WorkoutHandler,
         card_compatible::{ExerciseInputs, IngredientInputs, MealInputs, PlanInputs},
     },
     ui::{sizes::SizeSheet, theme::Theme},
@@ -32,6 +32,7 @@ pub struct PuwumpUi {
     pub plan_handler: AddTaskHandler<Plan, PlanInputs>,
     pub edit_plan_hndl: PlanEditHandler,
     pub edit_meal_hndl: MealEditHandler,
+    pub workout_hndl: WorkoutHandler,
     pub db: Db,
 }
 
@@ -48,6 +49,7 @@ impl PuwumpUi {
             plan_handler: AddTaskHandler::default(),
             edit_plan_hndl: PlanEditHandler::new(&db)?,
             edit_meal_hndl: MealEditHandler::new(&db)?,
+            workout_hndl: WorkoutHandler::default(),
             db,
         })
     }
@@ -73,7 +75,7 @@ impl eframe::App for PuwumpUi {
             View::Default => self.home_view(ui),
             View::AddExercise => self.add_exercise_view(ui),
             View::EditPlan => self.edit_plan_view(ui),
-            View::Workout => self.work_out_view(ui),
+            View::Workout => self.workout_view(ui),
             View::AddIngredient => self.add_ingredient_view(ui),
             View::AddPlan => self.add_plan_view(ui),
             View::AddMeal => self.add_meal_view(ui),
@@ -106,8 +108,6 @@ impl PuwumpUi {
         self.add_view(ui, &mut handler);
         self.plan_handler = handler;
     }
-
-    fn work_out_view(&mut self, _: &mut Ui) {}
 
     pub fn header(&mut self, ui: &mut Ui, full_width: f32, full_height: f32) {
         let header_height = full_height * 0.09;

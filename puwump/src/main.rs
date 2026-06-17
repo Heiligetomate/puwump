@@ -77,20 +77,9 @@ fn main() -> Result<()> {
     let db = &Db::init()?.reset()?;
     generate_plan_examples(&db)?;
     generate_exercise_examples(&db)?;
-    db.insert_plan_exercise(
-        db.get_all_plans()
-            .unwrap()
-            .get(0)
-            .unwrap()
-            .id,
-        db.get_all_exercises()
-            .unwrap()
-            .get(0)
-            .unwrap()
-            .id,
-        3,
-    )
-    .unwrap();
+    db.insert_plan_exercise(db.get_all_plans()?[0].id, db.get_all_exercises()?[0].id, 3)?;
+    db.insert_plan_exercise(db.get_all_plans()?[0].id, db.get_all_exercises()?[1].id, 3)?;
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()

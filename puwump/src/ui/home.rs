@@ -63,6 +63,9 @@ impl PuwumpUi {
 
             ui.add_space(spc);
             if self.button_full_width(ui, button_height, self.theme.red, "Workout") {
+                self.workout_hndl
+                    .update_plans(&self.db)
+                    .unwrap();
                 self.view = View::Workout;
             }
         });

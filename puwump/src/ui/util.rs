@@ -1,4 +1,4 @@
-use egui::{Button, Color32, Margin, RichText, Stroke, Ui};
+use egui::{Button, Color32, Margin, Rect, RichText, Stroke, Ui};
 
 use crate::ui::{
     core::{PuwumpUi, View},
@@ -74,6 +74,20 @@ impl PuwumpUi {
             .corner_radius(self.sizes.corner_radius),
         )
         .clicked()
+    }
+
+    pub fn progress_circle(&self, ui: &Ui, diameter: f32, rect: Rect, frac: f32, color: Color32) {
+        let start = -std::f32::consts::FRAC_PI_2;
+        let end = start + frac * std::f32::consts::TAU;
+        let segments = 64;
+        let points = (0..=segments)
+            .map(|i| {
+                let t = start + (end - start) * (i as f32 / segments as f32);
+                rect.center() + egui::vec2(t.cos(), t.sin()) * (diameter / 2.0 - 2.0)
+            })
+            .collect();
+        ui.painter()
+            .add(egui::Shape::line(points, egui::Stroke::new(4.0, color)));
     }
 }
 
