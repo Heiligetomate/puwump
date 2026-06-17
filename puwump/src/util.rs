@@ -12,7 +12,9 @@ use crate::errors::{PuwumpError, Result};
 pub fn get_full_db_path() -> Result<PathBuf> {
     let proj_dirs = ProjectDirs::from("io", "puwump", "puwump").ok_or(PuwumpError::HomeNotFound)?;
 
-    Ok(proj_dirs.data_dir().join("puwump.db"))
+    Ok(proj_dirs
+        .data_local_dir()
+        .join("puwump.db"))
 }
 
 pub fn create_dirs_to_path(path: &Path) -> Result<()> {
