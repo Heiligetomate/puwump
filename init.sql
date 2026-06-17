@@ -46,7 +46,7 @@ create TABLE IF NOT EXISTS ingredient_in_meal (
     amount_gr       INTEGER NOT NULL,
     meal_name       TEXT NOT NULL,
     ingredient_id   TEXT NOT NULL,
-    FOREIGN KEY     (meal_name)       REFERENCES meal(name)   ON DELETE CASCADE, 
+    FOREIGN KEY     (meal_id)       REFERENCES meal(id)       ON DELETE CASCADE, 
     FOREIGN KEY     (ingredient_id) REFERENCES ingredient(id) ON DELETE CASCADE
 );
 
