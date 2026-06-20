@@ -39,9 +39,18 @@ pub struct PuwumpUi {
 impl PuwumpUi {
     pub fn new(cc: &CreationContext) -> Result<Self> {
         let db = Db::init()?;
+
+        let theme = Theme::default();
+
+        let mut visuals = egui::Visuals::dark();
+        visuals.widgets.inactive.bg_fill = theme.text_field;
+        visuals.widgets.hovered.bg_fill = theme.header_bg;
+        visuals.window_fill = theme.text_field;
+        cc.egui_ctx.set_visuals(visuals);
+
         Ok(Self {
             view: View::Default,
-            theme: Theme::default(),
+            theme,
             sizes: SizeSheet::new(cc),
             meal_hndl: AddTaskHandler::default(),
             exercise_hndl: AddTaskHandler::default(),
