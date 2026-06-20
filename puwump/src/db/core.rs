@@ -31,8 +31,9 @@ impl Db {
     }
 
     pub fn delete(self) -> Result<()> {
-        remove_file(&self.path).map_err(|_| PuwumpError::DbRemoval)?;
-
+        let path = self.path.clone();
+        drop(self.con); // release the file handle before deleting
+        remove_file(&path).map_err(|_| PuwumpError::DbRemoval)?;
         Ok(())
     }
 
