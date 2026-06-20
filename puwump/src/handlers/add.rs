@@ -1,4 +1,8 @@
-use crate::models::{CardAdd, CardInputs, Exercise, ExerciseInputs, Ingredient, IngredientInputs, Meal, MealInputs, Model, Plan, PlanInputs};
+use crate::{
+    db::Db,
+    errors::Result,
+    models::{CardAdd, CardCrud, CardInputs, Exercise, ExerciseInputs, Ingredient, IngredientInputs, Meal, MealInputs, Model, Plan, PlanInputs},
+};
 
 pub struct AddTaskHandler<A: Model + CardAdd, I: CardInputs> {
     pub input_fields: I,
@@ -43,6 +47,13 @@ impl Default for AddTaskHandler<Meal, MealInputs> {
             data: Vec::new(),
             status: None,
         }
+    }
+}
+
+impl<A: CardCrud, I: CardInputs> AddTaskHandler<A, I> {
+    pub fn refresh_data(&mut self, db: &Db) -> Result<()> {
+        self.data = A::get_all(db)?;
+        Ok(())
     }
 }
 

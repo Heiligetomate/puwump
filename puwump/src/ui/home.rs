@@ -63,10 +63,9 @@ impl PuwumpUi {
                 ui.add_space(self.sizes.margin);
 
                 if self.button(ui, button_width, button_height, self.theme.green, "Edit Plan") {
-                    self.exercise_hndl.data = self
-                        .db
-                        .get_all_exercises()
-                        .unwrap_or_default();
+                    self.exercise_hndl
+                        .refresh_data(&self.db)
+                        .ok();
                     self.view = View::EditPlan;
                 }
 
