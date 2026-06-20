@@ -124,6 +124,8 @@ impl PuwumpUi {
                     .widgets
                     .hovered
                     .bg_fill = self.theme.header_bg;
+                ui.style_mut().visuals.window_fill = self.theme.text_field;
+                ui.style_mut().visuals.extreme_bg_color = self.theme.text_field;
 
                 for item in items {
                     let is_selected = new_selected == Some(item.key());
