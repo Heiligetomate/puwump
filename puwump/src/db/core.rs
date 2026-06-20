@@ -30,6 +30,7 @@ impl Db {
         Ok(self)
     }
 
+    #[allow(unused)]
     pub fn delete(self) -> Result<()> {
         let path = self.path.clone();
         drop(self.con); // release the file handle before deleting
@@ -37,6 +38,7 @@ impl Db {
         Ok(())
     }
 
+    #[allow(unused)]
     pub fn reset(self) -> Result<Self> {
         self.delete()?;
         let db = Self::init()?;
