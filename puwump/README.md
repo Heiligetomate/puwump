@@ -1,7 +1,8 @@
 # Puwump 
 
-> [!WARNING]
-> This probably does not work on Winslop (not tested)
+
+> [!INFO]
+> Tested on Windows 11 VM and Arch Linux 
 
 ## General info 
 
@@ -19,7 +20,8 @@ Saving data is achieved with a sqlite database.
 6. Add ingredients to meals 
 7. Workout 
 8. Eat 
-9. Log finished workouts (just in the db right now)
-10. Log finished meals   (just in the db right now
+9. Log finished workouts and meals (just in the db right now)
 
+> [!INFO]
+> This is a desktop App which might be supported for mobile some day
 
