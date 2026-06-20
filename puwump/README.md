@@ -1,7 +1,7 @@
 # Puwump 
 
 
-> [!INFO]
+> [!NOTE]
 > Tested on Windows 11 VM and Arch Linux 
 
 ## General info 
@@ -22,6 +22,6 @@ Saving data is achieved with a sqlite database.
 8. Eat 
 9. Log finished workouts and meals (just in the db right now)
 
-> [!INFO]
+> [!NOTE]
 > This is a desktop App which might be supported for mobile some day
 
