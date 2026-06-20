@@ -46,12 +46,6 @@ fn generate_meal_examples(db: &Db) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    let db = &Db::init()?.reset()?;
-    generate_plan_examples(&db)?;
-    generate_exercise_examples(&db)?;
-    generate_ingredient_examples(&db)?;
-    generate_meal_examples(&db)?;
-
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
         ..Default::default()
