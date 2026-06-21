@@ -81,6 +81,27 @@ impl PuwumpUi {
         ui.spacing_mut().interact_size.y = 40.0;
         self.set_dropdown_rounding(ui);
 
+        ui.visuals_mut()
+            .widgets
+            .inactive
+            .weak_bg_fill = self.theme.text_field;
+        ui.visuals_mut()
+            .widgets
+            .hovered
+            .weak_bg_fill = self.theme.header_bg;
+        ui.visuals_mut()
+            .widgets
+            .active
+            .weak_bg_fill = self.theme.text_field;
+        ui.visuals_mut()
+            .widgets
+            .open
+            .weak_bg_fill = self.theme.text_field;
+
+        ui.ctx().global_style_mut(|style| {
+            style.visuals.window_fill = self.theme.text_field;
+        });
+
         egui::ComboBox::from_id_salt("workout_plan_selector")
             .selected_text(
                 RichText::new(selected_text)
@@ -99,8 +120,11 @@ impl PuwumpUi {
 
     fn style_dropdown_menu(&self, ui: &mut Ui) {
         let widgets = &mut ui.style_mut().visuals.widgets;
-        widgets.inactive.bg_fill = self.theme.text_field;
-        widgets.hovered.bg_fill = self.theme.header_bg;
+        widgets.inactive.weak_bg_fill = self.theme.text_field;
+        widgets.hovered.weak_bg_fill = self.theme.header_bg;
+        widgets.active.weak_bg_fill = self.theme.header_bg;
+        ui.style_mut().visuals.window_fill = self.theme.text_field;
+        ui.style_mut().visuals.extreme_bg_color = self.theme.text_field;
     }
 
     fn plan_options(&self, ui: &mut Ui, handler: &mut WorkoutHandler) {

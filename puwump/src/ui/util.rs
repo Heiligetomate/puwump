@@ -104,6 +104,27 @@ impl PuwumpUi {
         ui.spacing_mut().interact_size.y = 40.0;
         self.set_dropdown_rounding(ui);
 
+        ui.visuals_mut()
+            .widgets
+            .inactive
+            .weak_bg_fill = self.theme.text_field;
+        ui.visuals_mut()
+            .widgets
+            .hovered
+            .weak_bg_fill = self.theme.header_bg;
+        ui.visuals_mut()
+            .widgets
+            .active
+            .weak_bg_fill = self.theme.text_field;
+        ui.visuals_mut()
+            .widgets
+            .open
+            .weak_bg_fill = self.theme.text_field;
+
+        ui.ctx().global_style_mut(|style| {
+            style.visuals.window_fill = self.theme.text_field;
+        });
+
         let mut new_selected = selected_key;
 
         egui::ComboBox::from_id_salt(id_salt)
@@ -118,12 +139,17 @@ impl PuwumpUi {
                     .visuals
                     .widgets
                     .inactive
-                    .bg_fill = self.theme.text_field;
+                    .weak_bg_fill = self.theme.text_field;
                 ui.style_mut()
                     .visuals
                     .widgets
                     .hovered
-                    .bg_fill = self.theme.header_bg;
+                    .weak_bg_fill = self.theme.header_bg;
+                ui.style_mut()
+                    .visuals
+                    .widgets
+                    .active
+                    .weak_bg_fill = self.theme.header_bg;
                 ui.style_mut().visuals.window_fill = self.theme.text_field;
                 ui.style_mut().visuals.extreme_bg_color = self.theme.text_field;
 
