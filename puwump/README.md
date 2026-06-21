@@ -2,6 +2,8 @@
 
 > Tested on Windows 11 VM and Arch Linux.
 
+> Note: This is a desktop App which might be supported for mobile some day.
+
 ## General info
 
 Puwump is a local desktop workout app.
@@ -20,4 +22,3 @@ Saving data is achieved with a sqlite database.
 8. Eat
 9. Log finished workouts and meals (just in the db right now)
 
-> Note: This is a desktop App which might be supported for mobile some day.
